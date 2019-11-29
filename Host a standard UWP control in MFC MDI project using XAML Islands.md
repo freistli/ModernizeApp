@@ -1,5 +1,5 @@
 
-# Host a standard UWP control in MFC MDI project using XAML Islands
+# Host standard UWP controls in MFC MDI project using XAML Islands
 
 This article will help developers to understand how to modernize MFC MDI project with Standard UWP Controls through XMAL Islands. In this sample, we will add XAML RelativePanel, UWP Ink canvas and toolbar into the document view of this MFC MDI project.  
 
@@ -79,8 +79,7 @@ Although MFC uses specific framework, it does support C++/WinRT as well. It alig
     #include <winrt/Windows.UI.Xaml.Media.Imaging.h>
     #pragma pop_macro("TRY")
     #pragma pop_macro("GetCurrentTime")
-    ```C++
-
+    ```
     Regarding the reason of using “GetCurrentTime” and “TRY” macros, please refer to:
     https://docs.microsoft.com/en-us/windows/uwp/cpp-and-winrt-apis/faq
 
