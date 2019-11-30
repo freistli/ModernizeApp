@@ -16,39 +16,39 @@ Although MFC uses specific framework, it does support C++/WinRT as well. It alig
 
 1. Create MFC App in Visual Studio 2019, will name it MFCAPP
 
-   ![image](images/MFC/0.png)  
+   ![image](../images/MFC/0.png)  
 
     Use below configuration to create the MFCAPP project
     
-    ![image](images/MFC/1.png)  
+    ![image](../images/MFC/1.png)  
 
     click **Finish** Build and Run it, here is its default UI
 
-    ![image](images/MFC/2.png) 
+    ![image](../images/MFC/2.png) 
 
     
   
 2. In Solution Explorer, right-click the MFCAPP project node,    click **Retarget Project**, select the **10.0.18362.0** or    a later SDK release, and then click OK.
  
-   ![image](images/MFC/3.png) 
+   ![image](../images/MFC/3.png) 
 
-   ![image](images/MFC/4.png) 
+   ![image](../images/MFC/4.png) 
  
 3.	Install the Microsoft.Windows.CppWinRT NuGet package:
 
     a.	Right-click the project in Solution Explorer and choose Manage NuGet Packages.
     b.	Select the Browse tab, search for the **Microsoft.Windows.CppWinRT** package, and install the latest version of this package.  
 
-    ![image](images/MFC/5.png)  
+    ![image](../images/MFC/5.png)  
 
 
     After install the nuget package, check the MFC project properties, you will notice its C++ version is ISO C++17, which is required by C++/WinRT:
 
-    ![image](images/MFC/6.png)
+    ![image](../images/MFC/6.png)
  
     Build this MFCApp, we can see winrt projected files are generated in the “Generated Files\winrt” folder:
 
-    ![image](images/MFC/7.png)
+    ![image](../images/MFC/7.png)
  
 
 4.	Install the **Microsoft.Toolkit.Win32.UI.SDK** NuGet          package:
@@ -56,7 +56,7 @@ Although MFC uses specific framework, it does support C++/WinRT as well. It alig
     a.	In the NuGet Package Manager window, make sure that Include prerelease is selected.  
     b.	Select the Browse tab, search for the **Microsoft.Toolkit.Win32.UI.SDK** package, and install version v6.0.0 (or Later) of this package.
 
-    ![image](images/MFC/8.png)
+    ![image](../images/MFC/8.png)
 
 ## Use XAML hosting APIs to host  UWP controls in MFC Document View
 
@@ -197,31 +197,41 @@ Although MFC uses specific framework, it does support C++/WinRT as well. It alig
         }
     }
     ```
-6.  Right click the MFCApp project, select **Class Wizard**:
+6.  Right click the MFCApp project, select **Class Wizard**: 
 
-![image](images/MFC/9.png)
+    ![image](../images/MFC/9.png)
 
-Add a method to handle WM_SIZE so that when view size changes we can handle it:
+    Add a handler to handle WM_SIZE so that when view size changes we can handle it: 
 
-![image](images/MFC/10.png)
+    ![image](../images/MFC/10.png)
 
-7.  
+7.  Modify the OnSize method handler:
 
-If  you see this error message when running the MFC app:
+    ```C++
+    void CMFCAppView::OnSize(UINT nType, int cx, int cy)
+    {
+        CView::OnSize(nType, cx, cy);
+        AdjustLayout();
+    }
+    ```
+8. Compile and Run this MFCAPP, if  you see this error message when running the MFC app:
+
+   ![image](../images/MFC/11.png)
  
-To solve it, please add one app.manifest in your project with below content:
+   To solve it, please add one app.manifest in your project with below content:
 
-<?xml version="1.0" encoding="UTF-8"?>
-<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
-  <compatibility xmlns="urn:schemas-microsoft-com:compatibility.v1">
-    <application>
-      <!-- Windows 10 -->
-      <maxversiontested Id="10.0.18362.0"/>
-      <supportedOS Id="{8e0f7a12-bfb3-4fe8-b9a5-48fd50a15a9a}" />
-    </application>
-  </compatibility>
-</assembly>
-
+    ```XML
+    <?xml version="1.0" encoding="UTF-8"?>
+    <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+    <compatibility xmlns="urn:schemas-microsoft-com:compatibility.v1">
+        <application>
+        <!-- Windows 10 -->
+        <maxversiontested Id="10.0.18362.0"/>
+        <supportedOS Id="{8e0f7a12-bfb3-4fe8-b9a5-48fd50a15a9a}" />
+        </application>
+    </compatibility>
+    </assembly>
+    ```
  
 
  
