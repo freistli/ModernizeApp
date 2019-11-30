@@ -92,8 +92,16 @@ Although MFC uses specific framework, it does support C++/WinRT as well. It alig
     using namespace Windows::UI::Xaml::Hosting;
     using namespace Windows::Foundation::Numerics;
     ```
+3.  Declare DesktopWindowXamlSource member and AdjustLayout       methods:
 
-3.  In MFCAPPView.CPP, add code into the CMFCAppView::OnDraw function, it adds XAML RelativePanel, TextBox, InkCanvas, and InkToolbar, and a background image into the default document view:
+    ```C++
+    private:
+        DesktopWindowXamlSource _desktopWindowXamlSource{ nullptr };
+    // Operations
+    public:
+        void AdjustLayout();
+    ```
+4.  In MFCAPPView.CPP, add code into the CMFCAppView::OnDraw function, it adds XAML RelativePanel, TextBox, InkCanvas, and InkToolbar, and a background image into the default document view:
 
     ```C++
     if (_desktopWindowXamlSource == nullptr)
@@ -172,6 +180,30 @@ Although MFC uses specific framework, it does support C++/WinRT as well. It alig
             AdjustLayout();
         }
     ```
+5.  Add AdjustLayout function to make XAML content layout properly:
+
+    ```C++
+    void CMFCAppView::AdjustLayout()
+    {
+        if (_desktopWindowXamlSource != nullptr)
+        {
+            auto interop = _desktopWindowXamlSource.as<IDesktopWindowXamlSourceNative>();
+            HWND xamlHostHwnd = NULL;
+            check_hresult(interop->get_WindowHandle(&xamlHostHwnd));
+
+            RECT windowRect;
+            GetWindowRect(&windowRect);
+            ::SetWindowPos(xamlHostHwnd, NULL, 0, 0, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top, SWP_SHOWWINDOW);
+        }
+    }
+    ```
+6.  Right click the MFCApp project, select **Class Wizard**:
+
+![image](images/MFC/9.png)
+
+Add a method to handle WM_SIZE so that when view size changes we can handle it:
+
+![image](images/MFC/10.png)
 
 If  you see this error message when running the MFC app:
  

@@ -63,7 +63,7 @@ void CMFCAppView::OnDraw(CDC* /*pDC*/)
 
 	// TODO: add draw code for native data here
 
-	// TODO STEP 3: Start
+	// TODO STEP 4: Start
 	if (_desktopWindowXamlSource == nullptr)
 	{
 		//XAML Island section
@@ -143,7 +143,7 @@ void CMFCAppView::OnDraw(CDC* /*pDC*/)
 		_desktopWindowXamlSource.Content(xamlContainer);
 		AdjustLayout();
 	}
-	// TODO STEP 3: End
+	// TODO STEP 4: End
 }
 
 //TODO STEP 5: Start
