@@ -205,6 +205,8 @@ Add a method to handle WM_SIZE so that when view size changes we can handle it:
 
 ![image](images/MFC/10.png)
 
+7.  
+
 If  you see this error message when running the MFC app:
  
 To solve it, please add one app.manifest in your project with below content:
