@@ -4,7 +4,7 @@
 This article will help developers to understand how to modernize MFC MDI project with Standard UWP Controls through XMAL Islands. In this sample, we will add XAML RelativePanel, UWP Ink canvas and toolbar into the document view of this MFC MDI project.  
 
 It brings Fluent UI to non-UWP desktops.
-Although MFC uses specific framework, it does support C++/WinRT as well. It aligns the pre-requirements and API architecture described in the article Using the UWP XAML hosting API in a C++ Win32 app . Here we mainly explain the specific modernization parts for MFC project.
+Although MFC uses specific framework, it does support C++/WinRT as well. It aligns the pre-requirements and API architecture described in the article [Using the UWP XAML hosting API in a C++ Win32 app](https://docs.microsoft.com/en-us/windows/apps/desktop/modernize/using-the-xaml-hosting-api). Here we mainly explain the specific modernization parts for MFC project.
 
 ## Development Environment
 
@@ -180,6 +180,15 @@ Although MFC uses specific framework, it does support C++/WinRT as well. It alig
             AdjustLayout();
         }
     ```
+
+    Meanwhile, put a **viewbackground.png** in the Res folder. And add this existing item into the Resources folder of project:
+    
+    <img src="../images/MFC/13.png" width="200">
+
+    Set the file's **Content** property as **True**
+
+    <img src="../images/MFC/14.png" width="400">
+
 5.  Add AdjustLayout function to make XAML content layout properly:
 
     ```C++
@@ -199,11 +208,12 @@ Although MFC uses specific framework, it does support C++/WinRT as well. It alig
     ```
 6.  Right click the MFCApp project, select **Class Wizard**: 
 
-    ![image](../images/MFC/9.png)
+    <img src="../images/MFC/9.png" width="300">
 
     Add a handler to handle WM_SIZE so that when view size changes we can handle it: 
 
     ![image](../images/MFC/10.png)
+    
 
 7.  Modify the OnSize method handler:
 
@@ -216,9 +226,9 @@ Although MFC uses specific framework, it does support C++/WinRT as well. It alig
     ```
 8. Compile and Run this MFCAPP, if  you see this error message when running the MFC app:
 
-   ![image](../images/MFC/11.png)
+   <img src="../images/MFC/11.png" width="300">
  
-   To solve it, please add one app.manifest in your project with below content:
+   To solve it, please add one **app.manifest** in your project with below content:
 
     ```XML
     <?xml version="1.0" encoding="UTF-8"?>
@@ -232,8 +242,50 @@ Although MFC uses specific framework, it does support C++/WinRT as well. It alig
     </compatibility>
     </assembly>
     ```
- 
 
- 
+    Now the project structure is like as below:
 
+    <img src="../images/MFC/12.png" width="200">
+
+ 9. For the best experience, we recommend that C++ Win32 application is configured to be per-monitor DPI aware. Enable High DPI Awareness **PerMonitorV2** in manifest:
+
+    ```XML
+    <?xml version="1.0" encoding="UTF-8"?>
+    <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+    <compatibility xmlns="urn:schemas-microsoft-com:compatibility.v1">
+        <application>
+    .....
+        <windowsSettings>
+            <dpiAwareness xmlns="http://schemas.microsoft.com/SMI/2016/WindowsSettings">PerMonitorV2</dpiAwareness>
+        </windowsSettings>
+    ......
+        </application>    
+    </compatibility>
+    </assembly>
+    ```
  
+    Now let's Ctrl+F5 to run this app, it will display as:
+
+    <img src="../images/MFC/15.png" >
+ 
+You may notice that it doesn't display the background image, since this kind of uri **ms-appx///res/viewbackground.png** needs to be used UWP package. In Visual Studio, with **"Windows Application Packaging Project (C++)"**, it is easily to packaging our MFC app project:
+
+<img src="../images/MFC/16.png" Width=400>
+
+Create the packaging project in the solution, right click the **Application** node, and select **Add Reference**, add MFCApp. Now the packaging project structure is like:
+
+<img src="../images/MFC/17.png" Width=200>
+
+For more information about packaging project, refer to:
+[Package a desktop app from source code using Visual Studio](https://docs.microsoft.com/en-us/windows/msix/desktop/desktop-to-uwp-packaging-dot-net)
+
+After this, choose the packaging project as Start Up project, Ctrl+F5 to run it. We can see the expected result will show up:
+
+<img src="../images/MFC/18.png">
+
+Further more, you can pubish this packaging app as MSIX or APPX, and easily deploy it:
+
+[Package a UWP app with Visual Studio](https://docs.microsoft.com/en-us/windows/msix/desktop/desktop-to-uwp-r2r)
+
+## Wrap Up
+This article gives detailed steps on how to use XAML Hosting APIs to integrate various standard UWP XMAL controls in document view of traditional MFC Mulitple Document Interface project, and optionally you can package the MFC app to MSIX or APPX packages and deploy it like a UWP app. 

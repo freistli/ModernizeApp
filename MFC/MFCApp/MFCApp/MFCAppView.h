@@ -25,11 +25,13 @@ protected: // create from serialization only
 public:
 	CMFCAppDoc* GetDocument() const;
 
+	//TODO STEP 3: Start
 private:
 	DesktopWindowXamlSource _desktopWindowXamlSource{ nullptr };
 // Operations
 public:
 	void AdjustLayout();
+	//TODO STEP 3: End
 // Overrides
 public:
 	virtual void OnDraw(CDC* pDC);  // overridden to draw this view

@@ -229,7 +229,6 @@ void CMFCAppView::OnSize(UINT nType, int cx, int cy)
 {
 	CView::OnSize(nType, cx, cy);
 	AdjustLayout();
-	// TODO: Add your message handler code here
 }
 
 //TODO STEP 6: End
