@@ -16,11 +16,11 @@ Although MFC uses specific framework, it does support C++/WinRT as well. It alig
 
 1. Create MFC App in Visual Studio 2019, will name it MFCAPP
 
-    <img src="../images/MFC/0.png" width="300">
+    <img src="../images/MFC/0.png" width="400">
 
     Use below configuration to create the MFCAPP project
     
-    <img src="../images/MFC/1.png" width="300">
+    <img src="../images/MFC/1.png" width="400">
 
     click **Finish** Build and Run it, here is its default UI
 
