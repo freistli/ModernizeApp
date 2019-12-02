@@ -91,6 +91,7 @@ Although MFC uses specific framework, it does support C++/WinRT as well. It alig
     using namespace Windows::UI::Composition;
     using namespace Windows::UI::Xaml::Hosting;
     using namespace Windows::Foundation::Numerics;
+    using namespace Windows::UI::Xaml::Controls;
     ```
 3.  Declare DesktopWindowXamlSource member and AdjustLayout       methods:
 
@@ -280,11 +281,10 @@ Although MFC uses specific framework, it does support C++/WinRT as well. It alig
         </application>    
     </compatibility>
     </assembly>
-    ```
- 
-    Now let's Ctrl+F5 to run this app, it will display as:
+    ``` 
+Now let's Ctrl+F5 to run this app, it will display as:
 
-    <img src="../images/MFC/15.png" >
+<img src="../images/MFC/15.png">
  
 You may notice that it doesn't display the background image, since this kind of uri **ms-appx///res/viewbackground.png** needs to be used UWP package. In Visual Studio, with **"Windows Application Packaging Project (C++)"**, it is easily to packaging our MFC app project:
 
