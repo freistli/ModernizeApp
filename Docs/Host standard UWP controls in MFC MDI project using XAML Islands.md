@@ -83,7 +83,7 @@ Although MFC uses specific framework, it does support C++/WinRT as well. It alig
     Regarding the reason of using “GetCurrentTime” and “TRY” macros, please refer to:
     https://docs.microsoft.com/en-us/windows/uwp/cpp-and-winrt-apis/faq
 
-2.	Using winrt namespaces in MFCAPPView.h
+2.	Using winrt namespaces in MFCAPPView.h and MFCAPP.h
 
     ```C++
     using namespace winrt;
@@ -93,12 +93,11 @@ Although MFC uses specific framework, it does support C++/WinRT as well. It alig
     using namespace Windows::Foundation::Numerics;
     using namespace Windows::UI::Xaml::Controls;
     ```
-3.  Declare DesktopWindowXamlSource member and AdjustLayout       methods:
+3.  Declare DesktopWindowXamlSource member and AdjustLayout       methods in MFCAPPView.h:
 
     ```C++
     private:
         DesktopWindowXamlSource _desktopWindowXamlSource{ nullptr };
-        WindowsXamlManager winxamlmanager = WindowsXamlManager{ nullptr };
         
         RelativePanel xamlContainer = RelativePanel{ nullptr };
         TextBlock tb = TextBlock{ nullptr };
@@ -109,15 +108,34 @@ Although MFC uses specific framework, it does support C++/WinRT as well. It alig
     public:
         void AdjustLayout();
     ```
-4.  In MFCAPPView.CPP, add code into the CMFCAppView::OnDraw function, it adds XAML RelativePanel, TextBox, InkCanvas, and InkToolbar, and a background image into the default document view:
+
+ 4. Initialize WindowsXamlManager in MFCApp instance.
+ 
+    Add WindowsXamlManager member in MFCAPP.h:
+
+    ```C++
+    WindowsXamlManager winxamlmanager = WindowsXamlManager{ nullptr };
+    ```
+
+    And initialize XMAL framework core window in MFCAPP.CPP:
+
+    ```C++
+    //Initialize the XAML framework's core window for the current thread.
+    BOOL CMFCAppApp::InitInstance()
+    {
+        ...
+        winxamlmanager = WindowsXamlManager::InitializeForCurrentThread();
+        ...
+    }
+    ```
+
+5.  In MFCAPPView.CPP, add code into the CMFCAppView::OnDraw function, it adds XAML RelativePanel, TextBox, InkCanvas, and InkToolbar, and a background image into the default document view:
 
     ```C++
     if (_desktopWindowXamlSource == nullptr)
 	{
 		//XAML Island section
 		
-		// Initialize the XAML framework's core window for the current thread.
-		winxamlmanager = WindowsXamlManager::InitializeForCurrentThread();
 
 		// This Hwnd will be the window handler for the Xaml Island: A child window that contains Xaml.  
 		HWND hWndXamlIsland = nullptr;
@@ -179,7 +197,7 @@ Although MFC uses specific framework, it does support C++/WinRT as well. It alig
 		xamlContainer.UpdateLayout();
 		_desktopWindowXamlSource.Content(xamlContainer);
 		AdjustLayout();
-    }
+	}
     ```
 
     Meanwhile, put a **viewbackground.png** in the Res folder. And add this existing item into the Resources folder of project:
@@ -190,7 +208,7 @@ Although MFC uses specific framework, it does support C++/WinRT as well. It alig
 
     <img src="../images/MFC/14.png" width="400">
 
-5. Clean up resources when the view is disconstructed
+6. Clean up resources when the view is disconstructed
 
     ```C++
     CMFCAppView::~CMFCAppView()
@@ -200,15 +218,10 @@ Although MFC uses specific framework, it does support C++/WinRT as well. It alig
             _desktopWindowXamlSource.Close();
             _desktopWindowXamlSource = nullptr;
         }
-        if (winxamlmanager != nullptr)
-        {
-            winxamlmanager.Close();
-            winxamlmanager = nullptr;
-        }
     }
     ```
 
-6.  Add AdjustLayout function to make XAML content layout properly:
+7.  Add AdjustLayout function to make XAML content layout properly:
 
     ```C++
     void CMFCAppView::AdjustLayout()
@@ -225,7 +238,7 @@ Although MFC uses specific framework, it does support C++/WinRT as well. It alig
         }
     }
     ```
-7.  Right click the MFCApp project, select **Class Wizard**: 
+8.  Right click the MFCApp project, select **Class Wizard**: 
 
     <img src="../images/MFC/9.png" width="300">
 
@@ -234,7 +247,7 @@ Although MFC uses specific framework, it does support C++/WinRT as well. It alig
     ![image](../images/MFC/10.png)
     
 
-8.  Modify the OnSize method handler:
+9.  Modify the OnSize method handler:
 
     ```C++
     void CMFCAppView::OnSize(UINT nType, int cx, int cy)
@@ -243,11 +256,11 @@ Although MFC uses specific framework, it does support C++/WinRT as well. It alig
         AdjustLayout();
     }
     ```
-9. Compile and Run this MFCAPP, if  you see this error message when running the MFC app:
+10. Compile and Run this MFCAPP, if  you see this error message when running the MFC app:
 
-   <img src="../images/MFC/11.png" width="300">
+    <img src="../images/MFC/11.png" width="300">
  
-   To solve it, please add one **app.manifest** in your project with below content:
+    To solve it, please add one **app.manifest** in your project with below content:
 
     ```XML
     <?xml version="1.0" encoding="UTF-8"?>
@@ -264,29 +277,29 @@ Although MFC uses specific framework, it does support C++/WinRT as well. It alig
 
     Now the project structure is like as below:
 
-    <img src="../images/MFC/12.png" width="200">
+    <img src="../images/MFC/12.png" width="300">
 
-10. For the best experience, we recommend that C++ Win32 application is configured to be per-monitor DPI aware. Enable High DPI Awareness **PerMonitorV2** in manifest:
+ 11. For the best experience, we recommend that C++ Win32 application is configured to be per-monitor DPI aware. Enable High DPI Awareness **PerMonitorV2** in manifest:
 
-    ```XML
-    <?xml version="1.0" encoding="UTF-8"?>
-    <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
-    <compatibility xmlns="urn:schemas-microsoft-com:compatibility.v1">
-        <application>
-    .....
-        <windowsSettings>
-            <dpiAwareness xmlns="http://schemas.microsoft.com/SMI/2016/WindowsSettings">PerMonitorV2</dpiAwareness>
-        </windowsSettings>
-    ......
-        </application>    
-    </compatibility>
-    </assembly>
-    ``` 
+      ```XML
+        <?xml version="1.0" encoding="UTF-8"?>
+        <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+        <compatibility xmlns="urn:schemas-microsoft-com:compatibility.v1">
+            <application>
+        .....
+            <windowsSettings>
+                <dpiAwareness xmlns="http://schemas.microsoft.com/SMI/2016/WindowsSettings">PerMonitorV2</dpiAwareness>
+            </windowsSettings>
+        ......
+            </application>    
+        </compatibility>
+        </assembly>
+      ```
 Now let's Ctrl+F5 to run this app, it will display as:
 
 <img src="../images/MFC/15.png">
  
-You may notice that it doesn't display the background image, since this kind of uri **ms-appx///res/viewbackground.png** needs to be used UWP package. In Visual Studio, with **"Windows Application Packaging Project (C++)"**, it is easily to packaging our MFC app project:
+ You may notice that it doesn't display the background image, since this kind of uri **ms-appx///res/viewbackground.png** needs to be used UWP package. In Visual Studio, with **"Windows Application Packaging Project (C++)"**, it is easily to packaging our MFC app project:
 
 <img src="../images/MFC/16.png" Width=400>
 

@@ -9,7 +9,15 @@
 
 #include "resource.h"       // main symbols
 
-
+//TODO STEP 2: Start
+//Using winrt namespaces
+using namespace winrt;
+using namespace Windows::UI;
+using namespace Windows::UI::Composition;
+using namespace Windows::UI::Xaml::Hosting;
+using namespace Windows::Foundation::Numerics;
+using namespace Windows::UI::Xaml::Controls;
+//TODO STEP 2: End
 // CMFCAppApp:
 // See MFCApp.cpp for the implementation of this class
 //
@@ -18,7 +26,7 @@ class CMFCAppApp : public CWinAppEx
 {
 public:
 	CMFCAppApp() noexcept;
-
+	WindowsXamlManager winxamlmanager = WindowsXamlManager{ nullptr };
 
 // Overrides
 public:
