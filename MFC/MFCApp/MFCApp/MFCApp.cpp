@@ -145,6 +145,10 @@ BOOL CMFCAppApp::InitInstance()
 	pMainFrame->ShowWindow(m_nCmdShow);
 	pMainFrame->UpdateWindow();
 
+
+	//Initialize the XAML framework's core window for the current thread.
+	winxamlmanager = WindowsXamlManager::InitializeForCurrentThread();
+
 	return TRUE;
 }
 

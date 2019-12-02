@@ -48,11 +48,6 @@ CMFCAppView::~CMFCAppView()
 		_desktopWindowXamlSource.Close();
 		_desktopWindowXamlSource = nullptr;
 	}
-	if (winxamlmanager != nullptr)
-	{
-		winxamlmanager.Close();
-		winxamlmanager = nullptr;
-	}
 }
 
 BOOL CMFCAppView::PreCreateWindow(CREATESTRUCT& cs)
@@ -79,8 +74,6 @@ void CMFCAppView::OnDraw(CDC* /*pDC*/)
 	{
 		//XAML Island section
 		
-		// Initialize the XAML framework's core window for the current thread.
-		winxamlmanager = WindowsXamlManager::InitializeForCurrentThread();
 
 		// This Hwnd will be the window handler for the Xaml Island: A child window that contains Xaml.  
 		HWND hWndXamlIsland = nullptr;

@@ -29,7 +29,6 @@ public:
 //TODO STEP 3: Start
 private:
 	DesktopWindowXamlSource _desktopWindowXamlSource{ nullptr };
-	WindowsXamlManager winxamlmanager = WindowsXamlManager{ nullptr };
 	
 	RelativePanel xamlContainer = RelativePanel{ nullptr };
 	TextBlock tb = TextBlock{ nullptr };
