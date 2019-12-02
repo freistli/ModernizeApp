@@ -73,7 +73,6 @@ void CMFCAppView::OnDraw(CDC* /*pDC*/)
 	if (_desktopWindowXamlSource == nullptr)
 	{
 		//XAML Island section
-		
 
 		// This Hwnd will be the window handler for the Xaml Island: A child window that contains Xaml.  
 		HWND hWndXamlIsland = nullptr;

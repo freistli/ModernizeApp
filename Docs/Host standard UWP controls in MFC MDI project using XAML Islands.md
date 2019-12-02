@@ -318,7 +318,7 @@ Further more, you can pubish this packaging app as MSIX or APPX, and easily depl
 
 [Package a UWP app with Visual Studio](https://docs.microsoft.com/en-us/windows/msix/desktop/desktop-to-uwp-r2r)
 
-## Add an event handler
+## Event handling
 
 In previous section, we added some UWP controls such as InkCanvas, InkToolbar, etc... using XAML Islands.
 It is really powerful and easy to use. In this section, we will communicate between UWP controls and MFC app using event handler.
