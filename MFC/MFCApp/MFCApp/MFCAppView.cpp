@@ -30,6 +30,7 @@ BEGIN_MESSAGE_MAP(CMFCAppView, CView)
 	ON_WM_CONTEXTMENU()
 	ON_WM_RBUTTONUP()
 	ON_WM_SIZE()
+	ON_WM_CLOSE()
 END_MESSAGE_MAP()
 
 // CMFCAppView construction/destruction
@@ -37,11 +38,21 @@ END_MESSAGE_MAP()
 CMFCAppView::CMFCAppView() noexcept
 {
 	// TODO: add construction code here
-
+	
 }
 
 CMFCAppView::~CMFCAppView()
 {
+	if (_desktopWindowXamlSource != nullptr)
+	{
+		_desktopWindowXamlSource.Close();
+		_desktopWindowXamlSource = nullptr;
+	}
+	if (winxamlmanager != nullptr)
+	{
+		winxamlmanager.Close();
+		winxamlmanager = nullptr;
+	}
 }
 
 BOOL CMFCAppView::PreCreateWindow(CREATESTRUCT& cs)
@@ -62,7 +73,7 @@ void CMFCAppView::OnDraw(CDC* /*pDC*/)
 		return;
 
 	// TODO: add draw code for native data here
-
+	
 	// TODO STEP 4: Start
 	if (_desktopWindowXamlSource == nullptr)
 	{
@@ -72,7 +83,7 @@ void CMFCAppView::OnDraw(CDC* /*pDC*/)
 		//winrt::init_apartment(apartment_type::single_threaded);
 
 		// Initialize the XAML framework's core window for the current thread.
-		//WindowsXamlManager winxamlmanager = WindowsXamlManager::InitializeForCurrentThread();
+		winxamlmanager = WindowsXamlManager::InitializeForCurrentThread();
 
 		// This Hwnd will be the window handler for the Xaml Island: A child window that contains Xaml.  
 		HWND hWndXamlIsland = nullptr;
@@ -95,21 +106,21 @@ void CMFCAppView::OnDraw(CDC* /*pDC*/)
 		auto viewHeight = size.bottom - size.top;
 
 		//Creating the Xaml content
-		Windows::UI::Xaml::Controls::RelativePanel xamlContainer;
+		xamlContainer = RelativePanel{};;
 		//xamlContainer.HorizontalAlignment(Windows::UI::Xaml::HorizontalAlignment::Stretch);
 		//xamlContainer.VerticalAlignment(Windows::UI::Xaml::VerticalAlignment::Stretch);
 		
 		// Update the xaml island window size becuase initially is 0,0
 		::SetWindowPos(hWndXamlIsland, NULL, 0, 0, viewWidth, viewHeight, SWP_SHOWWINDOW);
 
-		Windows::UI::Xaml::Controls::TextBlock tb;
+		tb = TextBlock{};
 		tb.Text(L"Modernized MFC");
 		tb.VerticalAlignment(Windows::UI::Xaml::VerticalAlignment::Center);
 		tb.HorizontalAlignment(Windows::UI::Xaml::HorizontalAlignment::Center);
 		tb.FontSize(48);
 		xamlContainer.Children().Append(tb);
 		
-		Windows::UI::Xaml::Controls::Image image;
+		image = Image{};
 		Windows::Foundation::Uri uri(L"ms-appx:///res/viewbackground.png");
 		Windows::UI::Xaml::Media::Imaging::BitmapImage bitmapImage(uri);
 		image.Source(bitmapImage);
@@ -118,37 +129,33 @@ void CMFCAppView::OnDraw(CDC* /*pDC*/)
 		xamlContainer.SetAlignLeftWithPanel(image, true);
 		xamlContainer.SetAlignRightWithPanel(image, true);
 		xamlContainer.SetBelow(image, tb);
-		
-		Windows::UI::Xaml::Controls::InkCanvas ic;
-
+				
+		ic = InkCanvas{};
 		ic.InkPresenter().InputDeviceTypes(winrt::Windows::UI::Core::CoreInputDeviceTypes::Touch | winrt::Windows::UI::Core::CoreInputDeviceTypes::Mouse);
-
-		Windows::UI::Xaml::Controls::InkToolbar it;
-		it.TargetInkCanvas(ic);
-		it.HorizontalAlignment(Windows::UI::Xaml::HorizontalAlignment::Left);
-		it.VerticalAlignment(Windows::UI::Xaml::VerticalAlignment::Top);
-
-		xamlContainer.Children().Append(ic);
-		xamlContainer.Children().Append(it);
-
 		xamlContainer.SetAlignLeftWithPanel(ic, true);
 		xamlContainer.SetBelow(ic, tb);
 		xamlContainer.SetAlignBottomWithPanel(ic, true);
 		xamlContainer.SetAlignRightWithPanel(ic, true);
+		xamlContainer.Children().Append(ic);
 
+		it = InkToolbar{};
+		xamlContainer.Children().Append(it);
 		xamlContainer.SetAlignLeftWithPanel(it, true);
 		xamlContainer.SetBelow(it, tb);
-
+		it.TargetInkCanvas(ic);
+		
 		xamlContainer.UpdateLayout();
 		_desktopWindowXamlSource.Content(xamlContainer);
 		AdjustLayout();
 	}
 	// TODO STEP 4: End
+
 }
 
 //TODO STEP 5: Start
 void CMFCAppView::AdjustLayout()
 {
+	
 	if (_desktopWindowXamlSource != nullptr)
 	{
 		auto interop = _desktopWindowXamlSource.as<IDesktopWindowXamlSourceNative>();
@@ -159,6 +166,7 @@ void CMFCAppView::AdjustLayout()
 		GetWindowRect(&windowRect);
 		::SetWindowPos(xamlHostHwnd, NULL, 0, 0, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top, SWP_SHOWWINDOW);
 	}
+	
 }
 //TODO STEP 5: End
 
@@ -229,6 +237,15 @@ void CMFCAppView::OnSize(UINT nType, int cx, int cy)
 {
 	CView::OnSize(nType, cx, cy);
 	AdjustLayout();
+}
+
+
+void CMFCAppView::OnClose()
+{
+	// TODO: Add your message handler code here and/or call default
+	
+	CView::OnClose();
+	
 }
 
 //TODO STEP 6: End

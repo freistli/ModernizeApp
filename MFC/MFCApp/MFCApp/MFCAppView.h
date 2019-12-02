@@ -13,6 +13,7 @@ using namespace Windows::UI;
 using namespace Windows::UI::Composition;
 using namespace Windows::UI::Xaml::Hosting;
 using namespace Windows::Foundation::Numerics;
+using namespace Windows::UI::Xaml::Controls;
 //TODO STEP 2: End
 
 class CMFCAppView : public CView
@@ -25,13 +26,21 @@ protected: // create from serialization only
 public:
 	CMFCAppDoc* GetDocument() const;
 
-	//TODO STEP 3: Start
+//TODO STEP 3: Start
 private:
 	DesktopWindowXamlSource _desktopWindowXamlSource{ nullptr };
-// Operations
+	WindowsXamlManager winxamlmanager = WindowsXamlManager{ nullptr };
+	
+	RelativePanel xamlContainer = RelativePanel{ nullptr };
+	TextBlock tb = TextBlock{ nullptr };
+	Image image = Image{ nullptr };
+	InkCanvas ic = InkCanvas{ nullptr };
+	InkToolbar it = InkToolbar{ nullptr };
+
 public:
 	void AdjustLayout();
-	//TODO STEP 3: End
+//TODO STEP 3: End
+
 // Overrides
 public:
 	virtual void OnDraw(CDC* pDC);  // overridden to draw this view
@@ -59,6 +68,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnClose();
 };
 
 #ifndef _DEBUG  // debug version in MFCAppView.cpp

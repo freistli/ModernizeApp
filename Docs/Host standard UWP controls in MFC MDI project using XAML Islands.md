@@ -1,7 +1,7 @@
 
 # Host standard UWP controls in MFC MDI project using XAML Islands
 
-This article will help developers to understand how to modernize MFC MDI project with Standard UWP Controls through XMAL Islands. In this sample, we will add XAML RelativePanel, UWP Ink canvas and toolbar into the document view of this MFC MDI project.  
+This article will help developers to understand how to modernize MFC MDI project with Standard UWP Controls through XMAL Islands. In this sample, we will add XAML RelativePanel, UWP Ink canvas and toolbar into the document view of this MFC MDI project. The sample MFCAPP solution is [here](https://github.com/freistli/ModernizeApp/tree/master/MFC/MFCApp)
 
 It brings Fluent UI to non-UWP desktops.
 Although MFC uses specific framework, it does support C++/WinRT as well. It aligns the pre-requirements and API architecture described in the article [Using the UWP XAML hosting API in a C++ Win32 app](https://docs.microsoft.com/en-us/windows/apps/desktop/modernize/using-the-xaml-hosting-api). Here we mainly explain the specific modernization parts for MFC project.
@@ -16,11 +16,11 @@ Although MFC uses specific framework, it does support C++/WinRT as well. It alig
 
 1. Create MFC App in Visual Studio 2019, will name it MFCAPP
 
-   ![image](../images/MFC/0.png)  
+    <img src="../images/MFC/0.png" width="300">
 
     Use below configuration to create the MFCAPP project
     
-    ![image](../images/MFC/1.png)  
+    <img src="../images/MFC/1.png" width="300">
 
     click **Finish** Build and Run it, here is its default UI
 
@@ -30,9 +30,9 @@ Although MFC uses specific framework, it does support C++/WinRT as well. It alig
   
 2. In Solution Explorer, right-click the MFCAPP project node,    click **Retarget Project**, select the **10.0.18362.0** or    a later SDK release, and then click OK.
  
-   ![image](../images/MFC/3.png) 
+   <img src="../images/MFC/3.png" width="300">
 
-   ![image](../images/MFC/4.png) 
+   <img src="../images/MFC/4.png" width="300">
  
 3.	Install the Microsoft.Windows.CppWinRT NuGet package:
 
@@ -97,7 +97,14 @@ Although MFC uses specific framework, it does support C++/WinRT as well. It alig
     ```C++
     private:
         DesktopWindowXamlSource _desktopWindowXamlSource{ nullptr };
-    // Operations
+        WindowsXamlManager winxamlmanager = WindowsXamlManager{ nullptr };
+        
+        RelativePanel xamlContainer = RelativePanel{ nullptr };
+        TextBlock tb = TextBlock{ nullptr };
+        Image image = Image{ nullptr };
+        InkCanvas ic = InkCanvas{ nullptr };
+        InkToolbar it = InkToolbar{ nullptr };
+
     public:
         void AdjustLayout();
     ```
@@ -105,80 +112,78 @@ Although MFC uses specific framework, it does support C++/WinRT as well. It alig
 
     ```C++
     if (_desktopWindowXamlSource == nullptr)
-        {
-            //XAML Island section
-            
-            // This Hwnd will be the window handler for the Xaml Island: A child window that contains Xaml.  
-            HWND hWndXamlIsland = nullptr;
+	{
+		//XAML Island section
+		
+		// The call to winrt::init_apartment initializes COM; by default, in a multithreaded apartment.
+		//winrt::init_apartment(apartment_type::single_threaded);
 
-            // This DesktopWindowXamlSource is the object that enables a non-UWP desktop application 
-            // to host UWP controls in any UI element that is associated with a window handle (HWND).
-            _desktopWindowXamlSource = DesktopWindowXamlSource{ };
+		// Initialize the XAML framework's core window for the current thread.
+		winxamlmanager = WindowsXamlManager::InitializeForCurrentThread();
 
-            // Get handle to corewindow
-            auto interop = _desktopWindowXamlSource.as<IDesktopWindowXamlSourceNative>();
+		// This Hwnd will be the window handler for the Xaml Island: A child window that contains Xaml.  
+		HWND hWndXamlIsland = nullptr;
 
-            // Parent the DesktopWindowXamlSource object to current window
-            check_hresult(interop->AttachToWindow(this->GetSafeHwnd()));
+		// This DesktopWindowXamlSource is the object that enables a non-UWP desktop application 
+		// to host UWP controls in any UI element that is associated with a window handle (HWND).
+		_desktopWindowXamlSource = DesktopWindowXamlSource{ };
 
-            // Get the new child window's hwnd 
-            interop->get_WindowHandle(&hWndXamlIsland);
+		// Get handle to corewindow
+		auto interop = _desktopWindowXamlSource.as<IDesktopWindowXamlSourceNative>();
+		// Parent the DesktopWindowXamlSource object to current window
+		check_hresult(interop->AttachToWindow(this->GetSafeHwnd()));
 
-            RECT size;
-            GetWindowRect(&size);
-            auto viewWidth = size.right - size.left;
-            auto viewHeight = size.bottom - size.top;
+		// Get the new child window's hwnd 
+		interop->get_WindowHandle(&hWndXamlIsland);
 
-            //Creating the Xaml content
-            Windows::UI::Xaml::Controls::RelativePanel xamlContainer;
-            
-            //Update the xaml island window size to view size becuase initially is 0,0
-            ::SetWindowPos(hWndXamlIsland, NULL, 0, 0, viewWidth, viewHeight, SWP_SHOWWINDOW);
-            
-            //Add TextBox
-            Windows::UI::Xaml::Controls::TextBlock tb;
-            tb.Text(L"Modernized MFC");
-            tb.VerticalAlignment(Windows::UI::Xaml::VerticalAlignment::Center);
-            tb.HorizontalAlignment(Windows::UI::Xaml::HorizontalAlignment::Center);
-            tb.FontSize(48);
-            xamlContainer.Children().Append(tb);
-            
-            //Add background image
-            Windows::UI::Xaml::Controls::Image image;
-            Windows::Foundation::Uri uri(L"ms-appx:///res/viewbackground.png");
-            Windows::UI::Xaml::Media::Imaging::BitmapImage bitmapImage(uri);
-            image.Source(bitmapImage);
+		RECT size;
+		GetWindowRect(&size);
+		auto viewWidth = size.right - size.left;
+		auto viewHeight = size.bottom - size.top;
 
-            xamlContainer.Children().Append(image);
-            xamlContainer.SetAlignLeftWithPanel(image, true);
-            xamlContainer.SetAlignRightWithPanel(image, true);
-            xamlContainer.SetBelow(image, tb);
-            
-            //Add InkCanvas and InkToolbar
-            Windows::UI::Xaml::Controls::InkCanvas ic;
+		//Creating the Xaml content
+		xamlContainer = RelativePanel{};;
+		//xamlContainer.HorizontalAlignment(Windows::UI::Xaml::HorizontalAlignment::Stretch);
+		//xamlContainer.VerticalAlignment(Windows::UI::Xaml::VerticalAlignment::Stretch);
+		
+		// Update the xaml island window size becuase initially is 0,0
+		::SetWindowPos(hWndXamlIsland, NULL, 0, 0, viewWidth, viewHeight, SWP_SHOWWINDOW);
 
-            ic.InkPresenter().InputDeviceTypes(winrt::Windows::UI::Core::CoreInputDeviceTypes::Touch | winrt::Windows::UI::Core::CoreInputDeviceTypes::Mouse);
+		tb = TextBlock{};
+		tb.Text(L"Modernized MFC");
+		tb.VerticalAlignment(Windows::UI::Xaml::VerticalAlignment::Center);
+		tb.HorizontalAlignment(Windows::UI::Xaml::HorizontalAlignment::Center);
+		tb.FontSize(48);
+		xamlContainer.Children().Append(tb);
+		
+		image = Image{};
+		Windows::Foundation::Uri uri(L"ms-appx:///res/viewbackground.png");
+		Windows::UI::Xaml::Media::Imaging::BitmapImage bitmapImage(uri);
+		image.Source(bitmapImage);
 
-            Windows::UI::Xaml::Controls::InkToolbar it;
-            it.TargetInkCanvas(ic);
-            it.HorizontalAlignment(Windows::UI::Xaml::HorizontalAlignment::Left);
-            it.VerticalAlignment(Windows::UI::Xaml::VerticalAlignment::Top);
+		xamlContainer.Children().Append(image);
+		xamlContainer.SetAlignLeftWithPanel(image, true);
+		xamlContainer.SetAlignRightWithPanel(image, true);
+		xamlContainer.SetBelow(image, tb);
+				
+		ic = InkCanvas{};
+		ic.InkPresenter().InputDeviceTypes(winrt::Windows::UI::Core::CoreInputDeviceTypes::Touch | winrt::Windows::UI::Core::CoreInputDeviceTypes::Mouse);
+		xamlContainer.SetAlignLeftWithPanel(ic, true);
+		xamlContainer.SetBelow(ic, tb);
+		xamlContainer.SetAlignBottomWithPanel(ic, true);
+		xamlContainer.SetAlignRightWithPanel(ic, true);
+		xamlContainer.Children().Append(ic);
 
-            xamlContainer.Children().Append(ic);
-            xamlContainer.Children().Append(it);
-
-            xamlContainer.SetAlignLeftWithPanel(ic, true);
-            xamlContainer.SetBelow(ic, tb);
-            xamlContainer.SetAlignBottomWithPanel(ic, true);
-            xamlContainer.SetAlignRightWithPanel(ic, true);
-
-            xamlContainer.SetAlignLeftWithPanel(it, true);
-            xamlContainer.SetBelow(it, tb);
-
-            xamlContainer.UpdateLayout();
-            _desktopWindowXamlSource.Content(xamlContainer);
-            AdjustLayout();
-        }
+		it = InkToolbar{};
+		xamlContainer.Children().Append(it);
+		xamlContainer.SetAlignLeftWithPanel(it, true);
+		xamlContainer.SetBelow(it, tb);
+		it.TargetInkCanvas(ic);
+		
+		xamlContainer.UpdateLayout();
+		_desktopWindowXamlSource.Content(xamlContainer);
+		AdjustLayout();
+    }
     ```
 
     Meanwhile, put a **viewbackground.png** in the Res folder. And add this existing item into the Resources folder of project:
@@ -189,7 +194,25 @@ Although MFC uses specific framework, it does support C++/WinRT as well. It alig
 
     <img src="../images/MFC/14.png" width="400">
 
-5.  Add AdjustLayout function to make XAML content layout properly:
+5. Clean up resources when the view is disconstructed
+
+    ```C++
+    CMFCAppView::~CMFCAppView()
+    {
+        if (_desktopWindowXamlSource != nullptr)
+        {
+            _desktopWindowXamlSource.Close();
+            _desktopWindowXamlSource = nullptr;
+        }
+        if (winxamlmanager != nullptr)
+        {
+            winxamlmanager.Close();
+            winxamlmanager = nullptr;
+        }
+    }
+    ```
+
+6.  Add AdjustLayout function to make XAML content layout properly:
 
     ```C++
     void CMFCAppView::AdjustLayout()
@@ -206,7 +229,7 @@ Although MFC uses specific framework, it does support C++/WinRT as well. It alig
         }
     }
     ```
-6.  Right click the MFCApp project, select **Class Wizard**: 
+7.  Right click the MFCApp project, select **Class Wizard**: 
 
     <img src="../images/MFC/9.png" width="300">
 
@@ -215,7 +238,7 @@ Although MFC uses specific framework, it does support C++/WinRT as well. It alig
     ![image](../images/MFC/10.png)
     
 
-7.  Modify the OnSize method handler:
+8.  Modify the OnSize method handler:
 
     ```C++
     void CMFCAppView::OnSize(UINT nType, int cx, int cy)
@@ -224,7 +247,7 @@ Although MFC uses specific framework, it does support C++/WinRT as well. It alig
         AdjustLayout();
     }
     ```
-8. Compile and Run this MFCAPP, if  you see this error message when running the MFC app:
+9. Compile and Run this MFCAPP, if  you see this error message when running the MFC app:
 
    <img src="../images/MFC/11.png" width="300">
  
@@ -247,7 +270,7 @@ Although MFC uses specific framework, it does support C++/WinRT as well. It alig
 
     <img src="../images/MFC/12.png" width="200">
 
- 9. For the best experience, we recommend that C++ Win32 application is configured to be per-monitor DPI aware. Enable High DPI Awareness **PerMonitorV2** in manifest:
+ 10. For the best experience, we recommend that C++ Win32 application is configured to be per-monitor DPI aware. Enable High DPI Awareness **PerMonitorV2** in manifest:
 
     ```XML
     <?xml version="1.0" encoding="UTF-8"?>
@@ -288,4 +311,4 @@ Further more, you can pubish this packaging app as MSIX or APPX, and easily depl
 [Package a UWP app with Visual Studio](https://docs.microsoft.com/en-us/windows/msix/desktop/desktop-to-uwp-r2r)
 
 ## Wrap Up
-This article gives detailed steps on how to use XAML Hosting APIs to integrate various standard UWP XMAL controls in document view of traditional MFC Mulitple Document Interface project, and optionally you can package the MFC app to MSIX or APPX packages and deploy it like a UWP app. 
+This article gives detailed steps on how to use XAML Hosting APIs to integrate various standard UWP XMAL controls in document view of traditional MFC Mulitple Document Interface project, and optionally you can package the MFC app to MSIX or APPX packages and deploy it like a UWP app. The whole smaple solution can be found from this repo: https://github.com/freistli/ModernizeApp/tree/master/MFC/MFCApp
