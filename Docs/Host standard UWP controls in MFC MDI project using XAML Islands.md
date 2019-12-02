@@ -265,7 +265,7 @@ Although MFC uses specific framework, it does support C++/WinRT as well. It alig
 
     <img src="../images/MFC/12.png" width="200">
 
- 10. For the best experience, we recommend that C++ Win32 application is configured to be per-monitor DPI aware. Enable High DPI Awareness **PerMonitorV2** in manifest:
+10. For the best experience, we recommend that C++ Win32 application is configured to be per-monitor DPI aware. Enable High DPI Awareness **PerMonitorV2** in manifest:
 
     ```XML
     <?xml version="1.0" encoding="UTF-8"?>
