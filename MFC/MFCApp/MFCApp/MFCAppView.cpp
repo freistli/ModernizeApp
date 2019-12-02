@@ -79,9 +79,6 @@ void CMFCAppView::OnDraw(CDC* /*pDC*/)
 	{
 		//XAML Island section
 		
-		// The call to winrt::init_apartment initializes COM; by default, in a multithreaded apartment.
-		//winrt::init_apartment(apartment_type::single_threaded);
-
 		// Initialize the XAML framework's core window for the current thread.
 		winxamlmanager = WindowsXamlManager::InitializeForCurrentThread();
 
@@ -106,9 +103,7 @@ void CMFCAppView::OnDraw(CDC* /*pDC*/)
 		auto viewHeight = size.bottom - size.top;
 
 		//Creating the Xaml content
-		xamlContainer = RelativePanel{};;
-		//xamlContainer.HorizontalAlignment(Windows::UI::Xaml::HorizontalAlignment::Stretch);
-		//xamlContainer.VerticalAlignment(Windows::UI::Xaml::VerticalAlignment::Stretch);
+		xamlContainer = RelativePanel{};
 		
 		// Update the xaml island window size becuase initially is 0,0
 		::SetWindowPos(hWndXamlIsland, NULL, 0, 0, viewWidth, viewHeight, SWP_SHOWWINDOW);
