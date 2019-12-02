@@ -305,5 +305,136 @@ Further more, you can pubish this packaging app as MSIX or APPX, and easily depl
 
 [Package a UWP app with Visual Studio](https://docs.microsoft.com/en-us/windows/msix/desktop/desktop-to-uwp-r2r)
 
+## Add an event handler
+
+In previous section, we added some UWP controls such as InkCanvas, InkToolbar, etc... using XAML Islands.
+It is really powerful and easy to use. In this section, we will communicate between UWP controls and MFC app using event handler.
+
+### The goal of this section
+
+Adding a new button right of the ruler button at InkToolbar. And handling click event of the button, then open a image file, and then change the background image of InkCanvas to the image file.
+
+<img src="../images/EventHandler/1.png">
+
+<img src="../images/EventHandler/2.png">
+
+
+1. Add include statements to pch.h to use some WinRT classes, because before using WinRT classes in MFC app, we have to include them:
+    ```cpp
+    #include <winrt/Windows.Foundation.h>
+    #include <winrt/Windows.UI.Xaml.Controls.Primitives.h>
+    #include <winrt/Windows.Storage.h>
+    #include <winrt/Windows.Storage.Streams.h>
+    ```
+
+    Finally, pch.h is as below:
+    ```cpp
+    // pch.h: This is a precompiled header file.
+    // Files listed below are compiled only once, improving build performance for future builds.
+    // This also affects IntelliSense performance, including code completion and many code browsing features.
+    // However, files listed here are ALL re-compiled if any one of them is updated between builds.
+    // Do not add files here that you will be updating frequently as this negates the performance advantage.
+
+    #ifndef PCH_H
+    #define PCH_H
+
+    // add headers that you want to pre-compile here
+    #include "framework.h"
+
+    //TODO STEP 1: Start
+    //Include winrt header files for MFC
+    //Refer to https://docs.microsoft.com/en-us/windows/uwp/cpp-and-winrt-apis/faq
+
+    #pragma push_macro("GetCurrentTime")
+    #pragma push_macro("TRY")
+    #undef GetCurrentTime
+    #undef TRY
+    #include <winrt/Windows.Foundation.Collections.h>
+    #include <winrt/Windows.system.h>
+    #include <winrt/windows.ui.xaml.hosting.h>
+    #include <windows.ui.xaml.hosting.desktopwindowxamlsource.h>
+    #include <winrt/windows.ui.xaml.controls.h>
+    #include <winrt/Windows.ui.xaml.media.h>
+    #include <winrt/Windows.UI.Core.h>
+    #include <winrt/Windows.UI.Input.Inking.h>
+    #include <winrt/Windows.UI.Xaml.Media.Imaging.h>
+    //TODO STEP1 of EventHandler: Start
+    #include <winrt/Windows.Foundation.h>
+    #include <winrt/Windows.UI.Xaml.Controls.Primitives.h>
+    #include <winrt/Windows.Storage.h>
+    #include <winrt/Windows.Storage.Streams.h>
+    //TODO STEP1 of EventHandler: End
+    #pragma pop_macro("TRY")
+    #pragma pop_macro("GetCurrentTime") 
+    //TODO STEP 1: End
+
+    #endif //PCH_H
+    ```
+2. Add using namespaces to MFCAppView.h:
+    ```cpp
+    using namespace Windows::UI::Xaml;
+    using namespace Windows::Foundation;
+    using namespace Windows::Storage;
+    ```
+3. Add a file that type of InkToolbarCustomToggleButton to MFCAppView class:
+    ```cpp
+    private:
+	    InkToolbarCustomToggleButton button = InkToolbarCustomToggleButton{ nullptr };
+    ```
+4. And create a member function to handling the click event:
+
+    - To MFCAppView.h:
+        ```cpp
+        private:
+            IAsyncAction OpenImageButton_Click(IInspectable const& sender, RoutedEventArgs const& args);
+        ```
+    - To MFCAppView.cpp:
+        ```cpp
+        IAsyncAction CMFCAppView::OpenImageButton_Click(IInspectable const& sender, RoutedEventArgs const&)
+        {
+            // Select an image file using MFC APIs
+            CFileDialog dialog{ TRUE, NULL, NULL, OFN_HIDEREADONLY | OFN_CREATEPROMPT, L"Image file|*.jpg;*.jpeg;*.png||" };
+            if (dialog.DoModal() != IDOK)
+            {
+                return;
+            }
+
+            // Open the image file and set the image to image control using WinRT APIs
+            auto file = co_await StorageFile::GetFileFromPathAsync((LPCTSTR)dialog.GetPathName());
+            auto stream = co_await file.OpenReadAsync();
+            Windows::UI::Xaml::Media::Imaging::BitmapImage bitmapImage{};
+            bitmapImage.SetSource(stream);
+            image.Source(bitmapImage);
+
+            // never set to `checked status`
+            button.IsChecked(false);
+        }
+        ```
+
+    As above code snippets, we can use concurrency and asynchrony(co_await keyword) with C++/WinRT almost all same as C#. Please check the following documents:
+    - [Concurrency and asynchronous operations with C++/WinRT](https://docs.microsoft.com/en-us/windows/uwp/cpp-and-winrt-apis/concurrency)
+    -[More advanced concurrency and asynchrony with C++/WinRT](https://docs.microsoft.com/en-us/windows/uwp/cpp-and-winrt-apis/concurrency-2)
+
+5. Add below code at bottom of creating InkToolbar control on MFCAppView.cpp to add InkToolbarCustomToggleButton to InkToolbar:
+    ```cpp
+    button = InkToolbarCustomToggleButton{};
+    auto icon = SymbolIcon{};
+    icon.Symbol(Symbol::OpenFile);
+    button.Content(icon);
+    ToolTipService::SetToolTip(button, winrt::box_value(L"Open image..."));
+    button.Click({ this, &CMFCAppView::OpenImageButton_Click });
+    it.Children().Append(button);
+    ```
+
+    In this code, adding OpenImageButton_Click member function as click event handler of InkToolbarCustomToggleButton. An event handler is created from pair of a method owner's pointer and a function pointer of member function. If you would like to use lambda function, ofcouse you can use it. Please see the following document:
+    - [Handle events by using delegates in C++/WinRT](https://docs.microsoft.com/en-us/windows/uwp/cpp-and-winrt-apis/handle-events)
+
+    And winrt::box_value function is really often used function to boxing scalar values to IInspectable that is root interface of every runtime class in WinRT. For C# developers, IInspectable class is like System.Object. For details of winrt::box_value function, please check the following document:
+    - [Boxing and unboxing scalar values to IInspectable with C++/WinRT](https://docs.microsoft.com/en-us/windows/uwp/cpp-and-winrt-apis/boxing)
+
+Now, let's press F5, then we can see a window that is added a new button to InkToolbar, same as images that are top of in this section.
+
+<img src="../images/EventHandler/1.png">
+
 ## Wrap Up
 This article gives detailed steps on how to use XAML Hosting APIs to integrate various standard UWP XMAL controls in document view of traditional MFC Mulitple Document Interface project, and optionally you can package the MFC app to MSIX or APPX packages and deploy it like a UWP app. The whole smaple solution can be found from this repo: https://github.com/freistli/ModernizeApp/tree/master/MFC/MFCApp

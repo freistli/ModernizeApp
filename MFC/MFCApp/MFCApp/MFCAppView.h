@@ -15,6 +15,11 @@ using namespace Windows::UI::Xaml::Hosting;
 using namespace Windows::Foundation::Numerics;
 using namespace Windows::UI::Xaml::Controls;
 //TODO STEP 2: End
+//TODO STEP 2 of EventHandler: Start
+using namespace Windows::UI::Xaml;
+using namespace Windows::Foundation;
+using namespace Windows::Storage;
+//TODO STEP 2 of EventHandler: End
 
 class CMFCAppView : public CView
 {
@@ -36,10 +41,13 @@ private:
 	Image image = Image{ nullptr };
 	InkCanvas ic = InkCanvas{ nullptr };
 	InkToolbar it = InkToolbar{ nullptr };
-
 public:
 	void AdjustLayout();
 //TODO STEP 3: End
+//TODO STEP 3 of EventHandler: Start
+private:
+	InkToolbarCustomToggleButton button = InkToolbarCustomToggleButton{ nullptr };
+//TODO STEP 3 of EventHandler: End
 
 // Overrides
 public:
@@ -69,6 +77,10 @@ protected:
 public:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnClose();
+//TODO STEP 4 of EventHandler: Start
+private:
+	IAsyncAction OpenImageButton_Click(IInspectable const& sender, RoutedEventArgs const& args);
+//TODO STEP 4 of EventHandler: End
 };
 
 #ifndef _DEBUG  // debug version in MFCAppView.cpp
