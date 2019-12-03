@@ -18,7 +18,6 @@
 #pragma push_macro("TRY")
 #undef GetCurrentTime
 #undef TRY
-
 #include <winrt/Windows.Foundation.Collections.h>
 #include <winrt/Windows.system.h>
 #include <winrt/windows.ui.xaml.hosting.h>
@@ -28,6 +27,12 @@
 #include <winrt/Windows.UI.Core.h>
 #include <winrt/Windows.UI.Input.Inking.h>
 #include <winrt/Windows.UI.Xaml.Media.Imaging.h>
+//TODO STEP1 of EventHandler: Start
+#include <winrt/Windows.Foundation.h>
+#include <winrt/Windows.UI.Xaml.Controls.Primitives.h>
+#include <winrt/Windows.Storage.h>
+#include <winrt/Windows.Storage.Streams.h>
+//TODO STEP1 of EventHandler: End
 #pragma pop_macro("TRY")
 #pragma pop_macro("GetCurrentTime") 
 //TODO STEP 1: End

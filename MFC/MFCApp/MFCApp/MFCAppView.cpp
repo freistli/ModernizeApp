@@ -73,7 +73,6 @@ void CMFCAppView::OnDraw(CDC* /*pDC*/)
 	if (_desktopWindowXamlSource == nullptr)
 	{
 		//XAML Island section
-		
 
 		// This Hwnd will be the window handler for the Xaml Island: A child window that contains Xaml.  
 		HWND hWndXamlIsland = nullptr;
@@ -131,6 +130,14 @@ void CMFCAppView::OnDraw(CDC* /*pDC*/)
 		xamlContainer.SetAlignLeftWithPanel(it, true);
 		xamlContainer.SetBelow(it, tb);
 		it.TargetInkCanvas(ic);
+
+		button = InkToolbarCustomToggleButton{};
+		auto icon = SymbolIcon{};
+		icon.Symbol(Symbol::OpenFile);
+		button.Content(icon);
+		ToolTipService::SetToolTip(button, winrt::box_value(L"Open image..."));
+		button.Click({ this, &CMFCAppView::OpenImageButton_Click });
+		it.Children().Append(button);
 		
 		xamlContainer.UpdateLayout();
 		_desktopWindowXamlSource.Content(xamlContainer);
@@ -237,3 +244,25 @@ void CMFCAppView::OnClose()
 }
 
 //TODO STEP 6: End
+
+// TODO Step 4 of EventHandler: Start
+IAsyncAction CMFCAppView::OpenImageButton_Click(IInspectable const& sender, RoutedEventArgs const&)
+{
+	// Select an image file using MFC APIs
+	CFileDialog dialog{ TRUE, NULL, NULL, OFN_HIDEREADONLY | OFN_CREATEPROMPT, L"Image file|*.jpg;*.jpeg;*.png||" };
+	if (dialog.DoModal() != IDOK)
+	{
+		return;
+	}
+
+	// Open the image file and set the image to image control using WinRT APIs
+	auto file = co_await StorageFile::GetFileFromPathAsync((LPCTSTR)dialog.GetPathName());
+	auto stream = co_await file.OpenReadAsync();
+	Windows::UI::Xaml::Media::Imaging::BitmapImage bitmapImage{};
+	bitmapImage.SetSource(stream);
+	image.Source(bitmapImage);
+
+	// never set to `checked status`
+	button.IsChecked(false);
+}
+// TODO Step 4 of EventHandler: Start
