@@ -1,4 +1,14 @@
-
+---
+description: This article helps developers to understand how to modernize MFC MDI project with Standard UWP Controls through XMAL Islands. 
+title: Host standard UWP controls in MFC MDI project using XAML Islands
+ms.date: 12/03/2019
+ms.topic: article
+keywords: windows 10, uwp, MFC, win32, C++, xaml islands
+ms.author: freistli, kaota
+author: freistli, runceel
+ms.localizationpriority: medium
+ms.custom: 19H1
+---
 # Host standard UWP controls in MFC MDI project using XAML Islands
 
 This article will help developers to understand how to modernize MFC MDI project with Standard UWP Controls through XMAL Islands. In this sample, we will add XAML RelativePanel, UWP Ink canvas and toolbar into the document view of this MFC MDI project, also enable Event Handling so that MFC can take action once event raised from XAML Controls. The sample MFCAPP solution is [here](https://github.com/freistli/ModernizeApp/tree/master/MFC/MFCApp)
