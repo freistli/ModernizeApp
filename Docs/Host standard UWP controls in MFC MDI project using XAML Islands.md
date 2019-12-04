@@ -13,8 +13,13 @@ ms.custom: 19H1
 
 This article will help developers to understand how to modernize MFC MDI project with Standard UWP Controls through XMAL Islands. In this sample, we will add XAML RelativePanel, UWP Ink canvas and toolbar into the document view of this MFC MDI project, also enable Event Handling so that MFC can take action once event raised from XAML Controls. The sample MFCAPP solution is [here](https://github.com/freistli/ModernizeApp/tree/master/MFC/MFCApp)
 
+> [!NOTE]
+> In the sample it calls **WindowsXamlManager** explicitly for demo purpose. Indeed It is not recommended to call **WindowsXamlManager::InitializeForCurrentThread()** directly.
+We prefer to create a new Xaml Application project that contains an Application object that inherits from the Tooklit XamlApplication object, similar to [this article](https://docs.microsoft.com/en-us/windows/apps/desktop/modernize/using-the-xaml-hosting-api#host-a-custom-uwp-control). Will explain this way in detail for MFC in next document **Integrate Customized UWP Control with MFC**.
+
 It brings Fluent UI to non-UWP desktops.
 Although MFC uses specific framework, it does support C++/WinRT as well. It aligns the pre-requirements and API architecture described in the article [Using the UWP XAML hosting API in a C++ Win32 app](https://docs.microsoft.com/en-us/windows/apps/desktop/modernize/using-the-xaml-hosting-api). Here we mainly explain the specific modernization parts for MFC project.
+
 
 ## Development Environment
 
@@ -138,6 +143,7 @@ Although MFC uses specific framework, it does support C++/WinRT as well. It alig
         ...
     }
     ```
+
 
 5.  In MFCAPPView.CPP, add code into the CMFCAppView::OnDraw function, it adds XAML RelativePanel, TextBox, InkCanvas, and InkToolbar, and a background image into the default document view:
 
