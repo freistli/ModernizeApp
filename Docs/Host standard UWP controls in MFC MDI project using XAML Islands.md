@@ -138,6 +138,9 @@ Although MFC uses specific framework, it does support C++/WinRT as well. It alig
         ...
     }
     ```
+    > [!NOTE]
+    > This **WindowsXamlManager** usage here is for quick demo purpose. It is not recommended to call **WindowsXamlManager::InitializeForCurrentThread()** directly.
+    It is prefer to create a new Xaml Application project that contains an Application object that inherits from the Tooklit XamlApplication object, similar to [this article](https://docs.microsoft.com/en-us/windows/apps/desktop/modernize/using-the-xaml-hosting-api#host-a-custom-uwp-control). Will explain this for MFC in next document **Integrate Customized UWP Control with MFC**.
 
 5.  In MFCAPPView.CPP, add code into the CMFCAppView::OnDraw function, it adds XAML RelativePanel, TextBox, InkCanvas, and InkToolbar, and a background image into the default document view:
 
