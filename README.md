@@ -1,5 +1,7 @@
 # Modernize App
 A place to help Windows Developers modernize their existing applications.
+
+![image](images/modernize_zh.png)
   
 ## Integrate Standard UWP Control with MFC 
 Sample: [MFCAPP](https://github.com/freistli/ModernizeApp/tree/master/MFC/MFCApp)  
