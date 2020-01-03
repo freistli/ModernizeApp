@@ -62,3 +62,83 @@ Overall, in our MFC project, we will have two parts to demonstrate this method:
 
 ## Configure UWP Project
 
+1. In Solution Explorer, right-click the solution node and select Add -> New Project.
+
+2. Add a Blank App (C++/WinRT) project to your solution. 
+
+![image](../images/MFCCustomControl/1.png)
+
+3. Give it a name ***MyApp***, and create it, Make sure the target version and minimum version are ***both*** set to Windows 10, version 1903 or later.
+
+
+4. Right click the MyApp and open its properties, make sure its C++/WinRT configuration is as below:
+
+![image](../images/MFCCustomControl/3.png)
+
+5. Change its output type from .EXE to Dynamic Library
+
+![image](../images/MFCCustomControl/4.png)
+
+6. Save a dummy.exe into the ***MyApp*** folder. It doesn't need to be a real exe, just input "dummy exe file" in notepad, and save it as ***dummy.exe***, that's all.
+
+![image](../images/MFCCustomControl/5.png)
+
+![image](../images/MFCCustomControl/6.png)
+
+7. Now edit Package.appxmanifest, change the Executable attribute to "dummy.exe"
+
+![image](../images/MFCCustomControl/7.png)
+
+8. Right click the ***MyApp*** project, select ***Unload Project***
+
+9. Right click the ***MyApp (Unloaded)*** project, select ***Edit MyApp.vcxproj***
+
+10. Add below properties to the ***MyApp.vcxproj*** project file:
+
+```XML
+<PropertyGroup Label="Globals">
+    <WindowsAppContainer>true</WindowsAppContainer>
+    <AppxGeneratePriEnabled>true</AppxGeneratePriEnabled>
+    <ProjectPriIndexName>App</ProjectPriIndexName>
+    <AppxPackage>true</AppxPackage>
+  </PropertyGroup>
+```
+
+For example:
+
+![image](../images/MFCCustomControl/8.png)
+
+11. Right click the ***MyApp (Unloaded)*** project, select ***Reload Project***.
+
+12. Right click the Win32 Project ***MFCApp***, select ***Unload Project***
+
+13. Right click the ***MFCApp (Unloaded)*** project, select ***Edit MFCApp.vcxproj***
+
+14. Add below properties to the ***MFCApp.vcxproj*** project file before the ***"<Import Project=""$(VCTargetsPath)\Microsoft.Cpp.targets" />"*** line:
+
+```XML
+  <PropertyGroup>
+    <AppProjectName>MyApp</AppProjectName>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AppIncludeDirectories>$(SolutionDir)\obj\$(Platform)\$(Configuration)\$(AppProjectName)\;$(SolutionDir)\obj\$(Platform)\$(Configuration)\$(AppProjectName)\Generated Files\;</AppIncludeDirectories>
+  </PropertyGroup>
+    <ItemGroup>
+    <NativeReferenceFile Include="$(SolutionDir)\bin\$(Platform)\$(Configuration)\$(AppProjectName)\*.xbf">
+      <DeploymentContent>true</DeploymentContent>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </NativeReferenceFile>
+    <NativeReferenceFile Include="$(SolutionDir)\bin\$(Platform)\$(Configuration)\$(AppProjectName)\*.dll">
+      <DeploymentContent>true</DeploymentContent>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </NativeReferenceFile>
+    <NativeReferenceFile Include="$(SolutionDir)\bin\$(Platform)\$(Configuration)\$(AppProjectName)\resources.pri">
+      <DeploymentContent>true</DeploymentContent>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </NativeReferenceFile>
+  </ItemGroup>
+  <------Right Here--------->
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+```
+
+
