@@ -53,7 +53,7 @@ Overall, in our MFC project, we will have two parts to demonstrate this method:
     ![image](../images/MFC/7.png)
  
 
-4.	Install the **Microsoft.Toolkit.Win32.UI.SDK** NuGet          package:
+4.	Install the **Microsoft.Toolkit.Win32.UI.SDK** NuGet package:
 
     a.	In the NuGet Package Manager window, make sure that Include prerelease is selected.  
     b.	Select the Browse tab, search for the **Microsoft.Toolkit.Win32.UI.SDK** package, and install version v6.0.0 (or Later) of this package.
@@ -79,11 +79,15 @@ Overall, in our MFC project, we will have two parts to demonstrate this method:
 
 ![image](../images/MFCCustomControl/4.png)
 
-6. Save a dummy.exe into the ***MyApp*** folder. It doesn't need to be a real exe, just input "dummy exe file" in notepad, and save it as ***dummy.exe***, that's all.
+6. Save a dummy.exe into the ***MyApp*** folder. It doesn't need to be a real exe, just input "dummy exe file" in notepad, and save it as ***dummy.exe***. 
 
 ![image](../images/MFCCustomControl/5.png)
 
 ![image](../images/MFCCustomControl/6.png)
+
+Make sure the Content property of dummy.exe is ***True***:
+
+![image](../images/MFCCustomControl/6.1.png)
 
 7. Now edit Package.appxmanifest, change the Executable attribute to "dummy.exe"
 
@@ -109,6 +113,80 @@ For example:
 ![image](../images/MFCCustomControl/8.png)
 
 11. Right click the ***MyApp (Unloaded)*** project, select ***Reload Project***.
+
+12. Right click ***Mainpage.xml***, select ***Remove***. And then click ***Delete***
+
+13. Copy App.cpp, App.h, App.idl contents to overwrite current ones:
+
+***App.cpp***
+```C++
+#include "pch.h"
+#include "App.h"
+
+using namespace winrt;
+using namespace Windows::UI::Xaml;
+
+namespace winrt::MyApp::implementation
+{
+    App::App()
+    {
+        Initialize();
+
+        AddRef();
+        m_inner.as<::IUnknown>()->Release();
+    }
+
+    App::~App()
+    {
+        Close();
+    }
+}
+
+```
+
+***App.h***
+```C++
+//
+// Declaration of the App class.
+//
+
+#pragma once
+
+#include "App.g.h"
+#include "App.base.h"
+
+namespace winrt::MyApp::implementation
+{
+    class App : public AppT2<App>
+    {
+    public:
+        App();
+        ~App();
+    };
+}
+
+namespace winrt::MyApp::factory_implementation
+{
+    class App : public AppT<App, implementation::App>
+    {
+    };
+}
+
+```
+***App.idl***
+```C++
+namespace MyApp
+{
+    [default_interface]
+    runtimeclass App: Microsoft.Toolkit.Win32.UI.XamlHost.XamlApplication
+    {
+        App();
+    }
+}
+
+```
+
+14. Install [Microsoft.Toolkit.Win32.UI.XamlApplication](https://www.nuget.org/packages/Microsoft.Toolkit.Win32.UI.XamlApplication) Nuget package.
 
 12. Right click the Win32 Project ***MFCApp***, select ***Unload Project***
 
@@ -141,4 +219,5 @@ For example:
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 ```
 
+15. Right click the ***MFCApp (Unloaded)*** project, select ***Reload Project***.
 
