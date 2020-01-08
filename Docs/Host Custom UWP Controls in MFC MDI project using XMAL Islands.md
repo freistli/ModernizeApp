@@ -525,6 +525,8 @@ if (_desktopWindowXamlSource == nullptr)
 
 2. Modify App.Xaml, TreeViewUserControl.Xaml, pch.h and TreeViewUserContro.cpp as below:
 
+    > For detailed reasons on modifying these files, can refer to this [article](https://docs.microsoft.com/en-us/windows/uwp/cpp-and-winrt-apis/simple-winui-example)    
+
  Add the Windows UI (WinUI) Theme Resources to ***App.Xmal***
 
 ```XML
@@ -597,3 +599,6 @@ void TreeViewUserControl::ClickHandler(IInspectable const&, RoutedEventArgs cons
 3. Build and run MFCApp, if steps have been taken exactly as above, it will show as below:
 
 ![image](../images/MFCCustomControl/23.gif)
+
+## Wrap Up
+This article gives detailed steps on how to leverage XamplApplication to host custom XAML control in document view of traditional MFC Mulitple Document Interface project, and the important thing is you can use WinUI to modernize the MFC application now. The whole smaple solution can be found from this repo: https://github.com/freistli/ModernizeApp/tree/master/MFC/MFCAppWinUI 
