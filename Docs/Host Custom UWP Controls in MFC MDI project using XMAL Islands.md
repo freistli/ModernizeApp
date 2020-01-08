@@ -383,7 +383,7 @@ $(IntDir)
 
 7. Right click ***MFCApp***, select ***Properties***, setup ***$(AppIncludeDirectories)*** as a part of include file path, this macro has been defined in the above project file:
 
-     <img src="../images/MFCCustomControl/17.png" width="300">
+     <img src="../images/MFCCustomControl/17.png" width="400">
 
 8. Set ***"Per Monitor DPI Aware"*** for ***DPI Awareness*** otherwise you may be not able to start this MFCApp when it is ***"High DPI Aware"*** and hit configuration error in Manifest:
 <img src="../images/MFCCustomControl/20.png" width="300">
@@ -491,13 +491,13 @@ if (_desktopWindowXamlSource == nullptr)
     public:
 	    void AdjustLayout();
     ```
-15.  Right click the MFCApp project, select **Class Wizard**: 
+15.  Right click the MFCApp project, select **Class Wizard**
 
-    <img src="../images/MFC/9.png" width="300">
+     <img src="../images/MFC/9.png" width="300">
 
-    Add a handler to handle WM_SIZE so that when view size changes we can handle it: 
+     Add a handler to handle WM_SIZE so that when view size changes we can handle it: 
 
-    ![image](../images/MFC/10.png)
+     ![image](../images/MFC/10.png)
     
 
 16.  Modify the OnSize method handler:
@@ -508,7 +508,7 @@ if (_desktopWindowXamlSource == nullptr)
         CView::OnSize(nType, cx, cy);
         AdjustLayout();
     }
-
+    ```
 
 17. Now you can build and run this MFCApp. It should display a button in the central of view window:
 
