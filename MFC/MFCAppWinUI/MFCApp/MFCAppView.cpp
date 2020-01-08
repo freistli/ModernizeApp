@@ -50,6 +50,20 @@ CMFCAppView::~CMFCAppView()
 	}
 }
 
+void CMFCAppView::AdjustLayout()
+{
+	if (_desktopWindowXamlSource != nullptr)
+	{
+		auto interop = _desktopWindowXamlSource.as<IDesktopWindowXamlSourceNative>();
+		HWND xamlHostHwnd = NULL;
+		check_hresult(interop->get_WindowHandle(&xamlHostHwnd));
+
+		RECT windowRect;
+		GetWindowRect(&windowRect);
+		::SetWindowPos(xamlHostHwnd, NULL, 0, 0, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top, SWP_SHOWWINDOW);
+	}
+}
+
 BOOL CMFCAppView::PreCreateWindow(CREATESTRUCT& cs)
 {
 	// TODO: Modify the Window class or styles here by modifying
@@ -66,104 +80,26 @@ void CMFCAppView::OnDraw(CDC* /*pDC*/)
 	ASSERT_VALID(pDoc);
 	if (!pDoc)
 		return;
-
 	// TODO: add draw code for native data here
-	
-	// TODO STEP 4: Start
 	if (_desktopWindowXamlSource == nullptr)
 	{
-		//XAML Island section
-
-		// This Hwnd will be the window handler for the Xaml Island: A child window that contains Xaml.  
-		HWND hWndXamlIsland = nullptr;
-
-		// This DesktopWindowXamlSource is the object that enables a non-UWP desktop application 
-		// to host UWP controls in any UI element that is associated with a window handle (HWND).
-		_desktopWindowXamlSource = DesktopWindowXamlSource{ };
-
-		// Get handle to corewindow
+		_desktopWindowXamlSource = DesktopWindowXamlSource{};
 		auto interop = _desktopWindowXamlSource.as<IDesktopWindowXamlSourceNative>();
-		// Parent the DesktopWindowXamlSource object to current window
-		check_hresult(interop->AttachToWindow(this->GetSafeHwnd()));
+		check_hresult(interop->AttachToWindow(GetSafeHwnd()));
 
-		// Get the new child window's hwnd 
-		interop->get_WindowHandle(&hWndXamlIsland);
-
-		RECT size;
-		GetWindowRect(&size);
-		auto viewWidth = size.right - size.left;
-		auto viewHeight = size.bottom - size.top;
-
-		//Creating the Xaml content
-		xamlContainer = RelativePanel{};
-		
-		// Update the xaml island window size becuase initially is 0,0
-		::SetWindowPos(hWndXamlIsland, NULL, 0, 0, viewWidth, viewHeight, SWP_SHOWWINDOW);
-
-		tb = TextBlock{};
-		tb.Text(L"Modernized MFC");
-		tb.VerticalAlignment(Windows::UI::Xaml::VerticalAlignment::Center);
-		tb.HorizontalAlignment(Windows::UI::Xaml::HorizontalAlignment::Center);
-		tb.FontSize(48);
-		xamlContainer.Children().Append(tb);
-		
-		image = Image{};
-		Windows::Foundation::Uri uri(L"ms-appx:///res/viewbackground.png");
-		Windows::UI::Xaml::Media::Imaging::BitmapImage bitmapImage(uri);
-		image.Source(bitmapImage);
-
-		xamlContainer.Children().Append(image);
-		xamlContainer.SetAlignLeftWithPanel(image, true);
-		xamlContainer.SetAlignRightWithPanel(image, true);
-		xamlContainer.SetBelow(image, tb);
-				
-		ic = InkCanvas{};
-		ic.InkPresenter().InputDeviceTypes(winrt::Windows::UI::Core::CoreInputDeviceTypes::Touch | winrt::Windows::UI::Core::CoreInputDeviceTypes::Mouse);
-		xamlContainer.SetAlignLeftWithPanel(ic, true);
-		xamlContainer.SetBelow(ic, tb);
-		xamlContainer.SetAlignBottomWithPanel(ic, true);
-		xamlContainer.SetAlignRightWithPanel(ic, true);
-		xamlContainer.Children().Append(ic);
-
-		it = InkToolbar{};
-		xamlContainer.Children().Append(it);
-		xamlContainer.SetAlignLeftWithPanel(it, true);
-		xamlContainer.SetBelow(it, tb);
-		it.TargetInkCanvas(ic);
-
-		button = InkToolbarCustomToggleButton{};
-		auto icon = SymbolIcon{};
-		icon.Symbol(Symbol::OpenFile);
-		button.Content(icon);
-		ToolTipService::SetToolTip(button, winrt::box_value(L"Open image..."));
-		button.Click({ this, &CMFCAppView::OpenImageButton_Click });
-		it.Children().Append(button);
-		
-		xamlContainer.UpdateLayout();
-		_desktopWindowXamlSource.Content(xamlContainer);
-		AdjustLayout();
-	}
-	// TODO STEP 4: End
-
-}
-
-//TODO STEP 5: Start
-void CMFCAppView::AdjustLayout()
-{
-	
-	if (_desktopWindowXamlSource != nullptr)
-	{
-		auto interop = _desktopWindowXamlSource.as<IDesktopWindowXamlSourceNative>();
 		HWND xamlHostHwnd = NULL;
 		check_hresult(interop->get_WindowHandle(&xamlHostHwnd));
+
+		_treeViewUserControl = winrt::MyApp::TreeViewUserControl();
+		_desktopWindowXamlSource.Content(_treeViewUserControl);
 
 		RECT windowRect;
 		GetWindowRect(&windowRect);
 		::SetWindowPos(xamlHostHwnd, NULL, 0, 0, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top, SWP_SHOWWINDOW);
+
 	}
-	
 }
-//TODO STEP 5: End
+
 
 // CMFCAppView printing
 
@@ -224,9 +160,6 @@ CMFCAppDoc* CMFCAppView::GetDocument() const // non-debug version is inline
 }
 #endif //_DEBUG
 
-//TODO STEP 6: Start
-// CMFCAppView message handlers
-
 
 void CMFCAppView::OnSize(UINT nType, int cx, int cy)
 {
@@ -243,26 +176,3 @@ void CMFCAppView::OnClose()
 	
 }
 
-//TODO STEP 6: End
-
-// TODO Step 4 of EventHandler: Start
-IAsyncAction CMFCAppView::OpenImageButton_Click(IInspectable const& sender, RoutedEventArgs const&)
-{
-	// Select an image file using MFC APIs
-	CFileDialog dialog{ TRUE, NULL, NULL, OFN_HIDEREADONLY | OFN_CREATEPROMPT, L"Image file|*.jpg;*.jpeg;*.png||" };
-	if (dialog.DoModal() != IDOK)
-	{
-		return;
-	}
-
-	// Open the image file and set the image to image control using WinRT APIs
-	auto file = co_await StorageFile::GetFileFromPathAsync((LPCTSTR)dialog.GetPathName());
-	auto stream = co_await file.OpenReadAsync();
-	Windows::UI::Xaml::Media::Imaging::BitmapImage bitmapImage{};
-	bitmapImage.SetSource(stream);
-	image.Source(bitmapImage);
-
-	// never set to `checked status`
-	button.IsChecked(false);
-}
-// TODO Step 4 of EventHandler: Start

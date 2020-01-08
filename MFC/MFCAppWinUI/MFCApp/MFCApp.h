@@ -26,7 +26,7 @@ class CMFCAppApp : public CWinAppEx
 {
 public:
 	CMFCAppApp() noexcept;
-	WindowsXamlManager winxamlmanager = WindowsXamlManager{ nullptr };
+	winrt::MyApp::App hostApp{ nullptr };
 
 // Overrides
 public:

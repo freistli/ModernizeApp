@@ -330,7 +330,7 @@ After this, choose the packaging project as Start Up project, Ctrl+F5 to run it.
 
 <img src="../images/MFC/18.png">
 
-Further more, you can pubish this packaging app as MSIX or APPX, and easily deploy it:
+Further more, you can publish this packaging app as MSIX or APPX, and easily deploy it:
 
 [Package a UWP app with Visual Studio](https://docs.microsoft.com/en-us/windows/msix/desktop/desktop-to-uwp-r2r)
 

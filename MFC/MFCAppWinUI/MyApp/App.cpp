@@ -1,5 +1,4 @@
 ﻿#include "pch.h"
-
 #include "App.h"
 
 using namespace winrt;
@@ -10,7 +9,6 @@ namespace winrt::MyApp::implementation
     App::App()
     {
         Initialize();
-
         AddRef();
         m_inner.as<::IUnknown>()->Release();
     }

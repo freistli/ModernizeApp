@@ -1,0 +1,9 @@
+namespace MyApp
+{
+    [default_interface]
+    runtimeclass TreeViewUserControl : Windows.UI.Xaml.Controls.UserControl
+    {
+        TreeViewUserControl();
+        Int32 MyProperty;
+    }
+}

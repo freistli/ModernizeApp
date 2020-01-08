@@ -5,12 +5,10 @@
   </ItemGroup>
   <ItemGroup>
     <Midl Include="App.idl" />
-    <Midl Include="MainPage.idl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="App.cpp" />
-    <ClCompile Include="MainPage.cpp" />
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -49,11 +47,13 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="PropertySheet.props" />
     <None Include="packages.config" />
     <None Include="dummy.exe" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="readme.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="TreeViewUserControl.xaml" />
   </ItemGroup>
 </Project>

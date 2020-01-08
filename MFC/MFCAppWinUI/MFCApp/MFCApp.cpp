@@ -121,6 +121,9 @@ BOOL CMFCAppApp::InitInstance()
 		return FALSE;
 	AddDocTemplate(pDocTemplate);
 
+//	winrt::init_apartment(winrt::apartment_type::single_threaded);
+	hostApp = winrt::MyApp::App{};
+
 	// create main MDI Frame window
 	CMainFrame* pMainFrame = new CMainFrame;
 	if (!pMainFrame || !pMainFrame->LoadFrame(IDR_MAINFRAME))
@@ -144,10 +147,6 @@ BOOL CMFCAppApp::InitInstance()
 	// The main window has been initialized, so show and update it
 	pMainFrame->ShowWindow(m_nCmdShow);
 	pMainFrame->UpdateWindow();
-
-
-	//Initialize the XAML framework's core window for the current thread.
-	winxamlmanager = WindowsXamlManager::InitializeForCurrentThread();
 
 	return TRUE;
 }

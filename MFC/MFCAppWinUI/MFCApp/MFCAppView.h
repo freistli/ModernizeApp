@@ -30,23 +30,9 @@ protected: // create from serialization only
 // Attributes
 public:
 	CMFCAppDoc* GetDocument() const;
-
-//TODO STEP 3: Start
-private:
-	DesktopWindowXamlSource _desktopWindowXamlSource{ nullptr };
 	
-	RelativePanel xamlContainer = RelativePanel{ nullptr };
-	TextBlock tb = TextBlock{ nullptr };
-	Image image = Image{ nullptr };
-	InkCanvas ic = InkCanvas{ nullptr };
-	InkToolbar it = InkToolbar{ nullptr };
 public:
 	void AdjustLayout();
-//TODO STEP 3: End
-//TODO STEP 3 of EventHandler: Start
-private:
-	InkToolbarCustomToggleButton button = InkToolbarCustomToggleButton{ nullptr };
-//TODO STEP 3 of EventHandler: End
 
 // Overrides
 public:
@@ -76,10 +62,10 @@ protected:
 public:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnClose();
-//TODO STEP 4 of EventHandler: Start
+
 private:
-	IAsyncAction OpenImageButton_Click(IInspectable const& sender, RoutedEventArgs const& args);
-//TODO STEP 4 of EventHandler: End
+	winrt::Windows::UI::Xaml::Hosting::DesktopWindowXamlSource _desktopWindowXamlSource{ nullptr };
+	winrt::MyApp::TreeViewUserControl _treeViewUserControl{ nullptr };
 };
 
 #ifndef _DEBUG  // debug version in MFCAppView.cpp
