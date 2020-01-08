@@ -62,7 +62,7 @@ Overall, in our MFC project, we will have two parts to demonstrate this method:
 
 5. Install the ***Microsoft.VCRTForwarders.140*** nuget package as well. Running Custom UWP Control in this project will require VC libs.
 
-![image](../images/MFCCustomControl/18.png)
+     <img src="../images/MFCCustomControl/18.png" width="300">
 
 ## Configure UWP Project
 
@@ -70,28 +70,28 @@ Overall, in our MFC project, we will have two parts to demonstrate this method:
 
 2. Add a Blank App (C++/WinRT) project to your solution. 
 
-![image](../images/MFCCustomControl/1.png)
+     <img src="../images/MFCCustomControl/1.png" width="300">
 
 3. Give it a name ***MyApp***, and create it, Make sure the target version and minimum version are ***both*** set to ***Windows 10, version 1903*** or later.
 
 
 4. Right click the MyApp and open its properties, make sure its C++/WinRT configuration is as below:
 
-![image](../images/MFCCustomControl/3.png)
+     <img src="../images/MFCCustomControl/3.png" width="400">
 
 5. Change its output type from .EXE to Dynamic Library
 
-![image](../images/MFCCustomControl/4.png)
+     <img src="../images/MFCCustomControl/4.png" width="400">
 
 6. Save a dummy.exe into the ***MyApp*** folder. It doesn't need to be a real exe, just input "dummy exe file" in notepad, and save it as ***dummy.exe***. 
 
-![image](../images/MFCCustomControl/5.png)
+     <img src="../images/MFCCustomControl/5.png" width="200">
 
-![image](../images/MFCCustomControl/6.png)
+     <img src="../images/MFCCustomControl/6.png" width="300">
 
-Make sure the Content property of dummy.exe is ***True***:
+    Make sure the Content property of dummy.exe is ***True***.
 
-![image](../images/MFCCustomControl/6.1.png)
+     <img src="../images/MFCCustomControl/6.1.png" width="300">
 
 7. Now edit Package.appxmanifest, change the Executable attribute to "dummy.exe"
 
@@ -280,11 +280,11 @@ This step is necessary for our next steps because we need to include winrt heade
 ```
 3. Click Views -> Other Windows -> Property Manager
 
-<img src="../images/MFCCustomControl/14.png" width="400">
+    <img src="../images/MFCCustomControl/14.png" width="300">
 
 4. Right click ***MFCApp***, select ***Add Existing Property Sheet***, add the new ***solution.props*** file
 
-<img src="../images/MFCCustomControl/15.png" width="400">
+    <img src="../images/MFCCustomControl/15.png" width="300">
 
 5. Repeat the step 4. for ***MyApp***. We can close the Property Manager window now.
 
@@ -296,13 +296,13 @@ $(OutDir)
 Intermidia Directory:
 $(IntDir)
 
-![image](../images/MFCCustomControl/12.png)
+ <img src="../images/MFCCustomControl/12.png" width="400">
 
 7. Repeat the step 6 for ***MyApp***.
 
 8. Right click the Solution node, and choose ***Project Dependencies***, make sure MFCApp depends on MyApp:
 
-![image](../images/MFCCustomControl/16.png)
+     <img src="../images/MFCCustomControl/16.png" width="200">
 
 9. Rebuild the whole solution, it should work without errors.
 
@@ -381,9 +381,9 @@ $(IntDir)
 
 6. Right click the ***MFCApp (Unloaded)*** project, select ***Reload Project***.
 
-7. Right click ***MFCApp***, select ***Properties***, setup ***$(AppIncludeDirectories)*** as a part of include file path:
+7. Right click ***MFCApp***, select ***Properties***, setup ***$(AppIncludeDirectories)*** as a part of include file path, this macro has been defined in the above project file:
 
-![image](../images/MFCCustomControl/17.png)
+     <img src="../images/MFCCustomControl/17.png" width="300">
 
 8. Set ***"Per Monitor DPI Aware"*** for ***DPI Awareness*** otherwise you may be not able to start this MFCApp when it is ***"High DPI Aware"*** and hit configuration error in Manifest:
 <img src="../images/MFCCustomControl/20.png" width="300">
@@ -593,3 +593,7 @@ void TreeViewUserControl::ClickHandler(IInspectable const&, RoutedEventArgs cons
         WinUITreeView().RootNodes().First().Current().Children().Append(tn);
     }
 ```
+
+3. Build and run MFCApp, if steps have been taken exactly as above, it will show as below:
+
+![image](../images/MFCCustomControl/23.gif)
