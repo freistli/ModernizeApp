@@ -15,7 +15,7 @@ This article will help developers to understand how to modernize MFC MDI project
 
 > [!NOTE]
 > In the sample it uses **WindowsXamlManager** explicitly. Generally It is not recommended to call **WindowsXamlManager::InitializeForCurrentThread()** directly.
-We prefer to create a new Xaml Application project that contains an Application object which inherits from the Tooklit XamlApplication object, similar to [this article](https://docs.microsoft.com/en-us/windows/apps/desktop/modernize/using-the-xaml-hosting-api#host-a-custom-uwp-control). Will explain this way in detail for MFC in next document **Integrate Customized UWP Control with MFC**.
+We prefer to create a new Xaml Application project that contains an Application object which inherits from the Tooklit XamlApplication object, similar to [this article](https://docs.microsoft.com/en-us/windows/apps/desktop/modernize/using-the-xaml-hosting-api#host-a-custom-uwp-control). Explain this way in detail for MFC in next document **IHost Custom UWP Controls in MFC MDI Project using XAML Islands**.
 
 It brings Fluent UI to non-UWP desktops.
 Although MFC uses specific framework, it does support C++/WinRT as well. It aligns the pre-requirements and API architecture described in the article [Using the UWP XAML hosting API in a C++ Win32 app](https://docs.microsoft.com/en-us/windows/apps/desktop/modernize/using-the-xaml-hosting-api). Here we mainly explain the specific modernization parts for MFC project.

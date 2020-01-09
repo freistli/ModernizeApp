@@ -1,12 +1,13 @@
-# Host Custom UWP Controls in MFC MDI Project using XAML Islands
+# Host Custom UWP Controls in C++ Win32 Project using XAML Islands
 
-This article explains how to modernize MFC MDI project with custom UWP Controls through XAML Islands. With custom UWP controls, it allows us to define control layout easily through XAML pages. Not only putting standard UWP controls into the custom control, we can also integrate other custom controls as well, such as latest WinUI controls. We will use a new Xaml Application project to bring the custom UWP controls into our MFC project. This [article](https://docs.microsoft.com/en-us/windows/apps/desktop/modernize/using-the-xaml-hosting-api#host-a-custom-uwp-control) has mentioned how to use the new XAML application in Win32 C++ application, we will give more detailed steps for MFC project.
+This article explains how to modernize C++ Win32 project with custom UWP Controls through XAML Islands in detail. With custom UWP controls, it allows us to define control layout easily through XAML pages. Not only putting standard UWP controls into the custom control, we can also integrate other custom controls as well, such as latest WinUI controls. We will use a new Xaml Application project to bring the custom UWP controls into our C++ Win32 project. This [article](https://docs.microsoft.com/en-us/windows/apps/desktop/modernize/using-the-xaml-hosting-api#host-a-custom-uwp-control) has mentioned how to use the new XAML application in Win32 C++ application, we will give more detailed steps.
 
-Overall, in our MFC project, we will have two parts to demonstrate this method:
+Overall, in our solution, we will have two parts to demonstrate this method:
 
-* MFC MDI Project
+* C++ Win32 Project
 * A companion UWP app project that defines a XamlApplication object.  
-  In this project, we will define a custom UWP control and export it so that MFC can use the custom UWP control.
+
+  In this project, we will define a custom UWP control and export it so that C++ Win32 can use the custom UWP control.
 
 ## Development Environment  
 
@@ -14,43 +15,33 @@ Overall, in our MFC project, we will have two parts to demonstrate this method:
 * Windows 10 1909 (18363.476)  
 * Windows 10 SDK (10.0.18362.1)  
 
-## Configure MFC Project
+## Configure C++ Win32 Project
 
-1. Create MFC App in Visual Studio 2019, will name it MFCAPP
+1. Create C++ Win32 in Visual Studio 2019, will name it SimpleApp
 
-    <img src="../images/MFC/0.png" width="400">
+    <img src="../images/C++/01.png" width="300">
 
-    Use below configuration to create the MFCAPP project
-    
-    <img src="../images/MFC/1.png" width="400">
-
-    click **Finish** Build and Run it, here is its default UI
-
-    ![image](../images/MFC/2.png) 
-
-    
-  
-2. In Solution Explorer, right-click the MFCAPP project node,    click **Retarget Project**, select the **10.0.18362.0** or    a later SDK release, and then click OK.
+2. In Solution Explorer, right-click the Simple project node,    click **Retarget Project**, select the **10.0.18362.0** or    a later SDK release, and then click OK.
  
    <img src="../images/MFC/3.png" width="300">
 
-   <img src="../images/MFC/4.png" width="300">
+   <img src="../images/C++/02.png" width="300">
  
-3.	Install the Microsoft.Windows.CppWinRT NuGet package:
+3.	Install the ***Microsoft.Windows.CppWinRT*** NuGet package:
 
     a.	Right-click the project in Solution Explorer and choose ***Manage NuGet Packages***.
     b.	Select the Browse tab, search for the **Microsoft.Windows.CppWinRT** package, and install the latest version of this package.  
 
-    ![image](../images/MFC/5.png)  
+    <img src="../images/C++/03.png" width="400">
 
 
-    After install the nuget package, check the MFC project properties, you will notice its C++ version is ISO C++17, which is required by C++/WinRT:
+    After install the nuget package, check the SimpleApp project properties, you will notice its C++ version is ISO C++17, which is required by C++/WinRT:
 
-    ![image](../images/MFC/6.png)
+    <img src="../images/C++/04.png" width="400">
  
-    Build this MFCApp, we can see winrt projected files are generated in the “Generated Files\winrt” folder:
+    Build this SimpleApp, we can see winrt projected files are generated in the “Generated Files\winrt” folder:
 
-    ![image](../images/MFC/7.png)
+    <img src="../images/C++/05.png" width="400">
  
 
 4.	Install the **Microsoft.Toolkit.Win32.UI.SDK** NuGet package:
@@ -58,11 +49,11 @@ Overall, in our MFC project, we will have two parts to demonstrate this method:
     a.	In the NuGet Package Manager window, make sure that Include prerelease is selected.  
     b.	Select the Browse tab, search for the **Microsoft.Toolkit.Win32.UI.SDK** package, and install version v6.0.0 (or Later) of this package.
 
-    ![image](../images/MFC/8.png)
+    <img src="../images/C++/06.png" width="400">
 
 5. Install the ***Microsoft.VCRTForwarders.140*** nuget package as well. Running Custom UWP Control in this project will require VC libs.
 
-     <img src="../images/MFCCustomControl/18.png" width="300">
+   <img src="../images/C++/7.png" width="400">
 
 ## Configure UWP Project
 
@@ -74,12 +65,13 @@ Overall, in our MFC project, we will have two parts to demonstrate this method:
 
 3. Give it a name ***MyApp***, and create it, Make sure the target version and minimum version are ***both*** set to ***Windows 10, version 1903*** or later.
 
+    <img src="../images/C++/8.png" width="300">
 
 4. Right click the MyApp and open its properties, make sure its C++/WinRT configuration is as below:
 
      <img src="../images/MFCCustomControl/3.png" width="400">
 
-5. Change its output type from .EXE to Dynamic Library
+5. Change its output type from .EXE to ***Dynamic Library***
 
      <img src="../images/MFCCustomControl/4.png" width="400">
 
@@ -87,11 +79,11 @@ Overall, in our MFC project, we will have two parts to demonstrate this method:
 
      <img src="../images/MFCCustomControl/5.png" width="200">
 
-     <img src="../images/MFCCustomControl/6.png" width="300">
+     <img src="../images/C++/9.png" width="300">
 
-    Make sure the Content property of dummy.exe is ***True***.
+    Add the dummy.exe into MyApp project, and make sure the Content property of dummy.exe is ***True***.
 
-     <img src="../images/MFCCustomControl/6.1.png" width="300">
+     <img src="../images/C++/10.png" width="300">
 
 7. Now edit Package.appxmanifest, change the Executable attribute to "dummy.exe"
 
@@ -119,6 +111,8 @@ For example:
 11. Right click the ***MyApp (Unloaded)*** project, select ***Reload Project***.
 
 12. Right click ***Mainpage.xml***, select ***Remove***. And then click ***Delete***
+
+    <img src="../images/C++/11.png" width="300">
 
 13. Copy App.Xaml, App.cpp, App.h, App.idl contents to overwrite current ones:
 
@@ -205,7 +199,7 @@ namespace MyApp
 }
 
 ```
-14. Create app.base.h in this project, and use below content:
+14. Create app.base.h in this MyApp project, and use below content:
 
 ***app.base.h***
 
@@ -262,9 +256,9 @@ namespace winrt::MyApp::implementation
 
 This step is necessary for our next steps because we need to include winrt header files in different projects properly, and MFCApp also needs to reference MyApp resource files.
 
-1. Add a new Solution.Props file by right clicking the solution node, and select Add -> New Item:
+1. Add a new ***Solution.Props*** file by right clicking the ***solution*** node, and select Add -> New Item:
 
-![image](../images/MFCCustomControl/13.png)
+    <img src="../images/MFCCustomControl/13.png" width="400">
 
 2. Use below content to overwrite the Solution.Props:
 
@@ -280,15 +274,23 @@ This step is necessary for our next steps because we need to include winrt heade
 ```
 3. Click Views -> Other Windows -> Property Manager
 
-    <img src="../images/MFCCustomControl/14.png" width="300">
+    <img src="../images/C++/12.png" width="200">
 
-4. Right click ***MFCApp***, select ***Add Existing Property Sheet***, add the new ***solution.props*** file
+4. Right click ***SimpleApp***, select ***Add Existing Property Sheet***, add the new ***solution.props*** file
 
-    <img src="../images/MFCCustomControl/15.png" width="300">
+    <img src="../images/C++/13.png" width="300">
 
 5. Repeat the step 4. for ***MyApp***. We can close the Property Manager window now.
 
-6. Right click the project node ***MFCApp***, select Properties. Set 
+6. Right click the project node ***MFCApp***, select Properties. 
+
+If you see the Outut and Intermidiate directries are already become as below, then can skip this step:
+
+$(SolutionDir)\bin\$(Platform)\$(Configuration)\$(MSBuildProjectName)\
+and
+$(SolutionDir)\obj\$(Platform)\$(Configuration)\$(MSBuildProjectName)\
+    
+Otherwise please manually set：
 
 Output Directory:
 $(OutDir)
@@ -300,7 +302,7 @@ $(IntDir)
 
 7. Repeat the step 6 for ***MyApp***.
 
-8. Right click the Solution node, and choose ***Project Dependencies***, make sure MFCApp depends on MyApp:
+8. Right click the Solution node, and choose ***Project Dependencies***, make sure SimpleApp depends on MyApp:
 
      <img src="../images/MFCCustomControl/16.png" width="200">
 
@@ -310,13 +312,13 @@ $(IntDir)
 ## Add UWP Custom XAML Control to MyApp
 
 1. Right click ***MyApp***, select Add -> New Item
-2. Create ***Blank User Conrol (C++/WinRT)***, here we call it TreeViewUserControl:
+2. Create ***Blank User Conrol (C++/WinRT)***, here we call it MainUserControl:
 
-![image](../images/MFCCustomControl/10.png)
+    <img src="../images/C++/16.png" width="400">
 
-## Integrate Custom XAML Control in MFCApp
+## Integrate Custom XAML Control in SimpleApp
 
-1. Add one **app.manifest** in your project with below content to register custom control type:
+1. Add one XML file **app.manifest** in your project with below content to register custom control type:
 
 ```XML
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
@@ -334,7 +336,7 @@ $(IntDir)
             threadingModel="both"
             xmlns="urn:schemas-microsoft-com:winrt.v1" />
         <activatableClass
-            name="MyApp.TreeViewUserControl"
+            name="MyApp.MainUserControl"
             threadingModel="both"
             xmlns="urn:schemas-microsoft-com:winrt.v1" />
     </asmv3:file>
@@ -342,13 +344,13 @@ $(IntDir)
 ```
 2.  Now the project structure is like as below:
 
-    <img src="../images/MFC/12.png" width="300">
+    <img src="../images/c++/17.png" width="300">
 
-3. Right click the Win32 Project ***MFCApp***, select ***Unload Project***
+3. Right click the Win32 Project ***SimpleApp***, select ***Unload Project***
 
-4. Right click the ***MFCApp (Unloaded)*** project, select ***Edit MFCApp.vcxproj***
+4. Right click the ***SimpleApp (Unloaded)*** project, select ***Edit SimpleApp.vcxproj***
 
-5. Remove the three lines from the ***MFCApp.vcxproj*** project file:
+5. Remove the three lines from the ***SimpleApp.vcxproj*** project file:
 
 ```XML
 <ItemGroup>
@@ -356,7 +358,7 @@ $(IntDir)
 </ItemGroup>
 ```
 
-Add below properties to the ***MFCApp.vcxproj*** project file before the ***"<Import Project=""$(VCTargetsPath)\Microsoft.Cpp.targets" />"*** line:
+Add below properties to the ***SimpleApp.vcxproj*** project file before the ***"<Import Project=""$(VCTargetsPath)\Microsoft.Cpp.targets" />"*** line:
 
 ```XML
   <ItemGroup>
@@ -387,24 +389,20 @@ Add below properties to the ***MFCApp.vcxproj*** project file before the ***"<Im
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 ```
 
-6. Right click the ***MFCApp (Unloaded)*** project, select ***Reload Project***.
+6. Right click the ***SimpleApp (Unloaded)*** project, select ***Reload Project***.
 
-7. Right click ***MFCApp***, select ***Properties***, setup ***$(AppIncludeDirectories)*** as a part of include file path, this macro has been defined in the above project file:
+7. Right click ***SimpleApp***, select ***Properties***, setup ***$(AppIncludeDirectories)*** as a part of include file path, this macro has been defined in the above project file:
 
-     <img src="../images/MFCCustomControl/17.png" width="400">
+     <img src="../images/C++/18.png" width="400">
 
-8. Set ***"Per Monitor DPI Aware"*** for ***DPI Awareness*** otherwise you may be not able to start this MFCApp when it is ***"High DPI Aware"*** and hit configuration error in Manifest:
-<img src="../images/MFCCustomControl/20.png" width="300">
+8. Set ***"Per Monitor DPI Aware"*** for ***DPI Awareness*** otherwise you may be not able to start this SimpleApp when it is ***"High DPI Aware"*** and hit configuration error in Manifest:
+    <img src="../images/C++/19.png" width="200">
 
-![image](../images/MFCCustomControl/19.png)
+    <img src="../images/C++/20.png" width="400">
 
-9. Open pch.h, add below code to include necessary winrt header files:
+9. Open framework.h, add below code to include necessary winrt header files:
 
     ```C++
-    #pragma push_macro("GetCurrentTime")
-    #pragma push_macro("TRY")
-    #undef GetCurrentTime
-    #undef TRY
     #include <winrt/Windows.Foundation.Collections.h>
     #include <winrt/Windows.system.h>
     #include <winrt/windows.ui.xaml.hosting.h>
@@ -413,13 +411,9 @@ Add below properties to the ***MFCApp.vcxproj*** project file before the ***"<Im
     #include <winrt/Windows.ui.xaml.media.h>
     #include <winrt/Windows.UI.Core.h>
     #include <winrt/myapp.h>
-    #pragma pop_macro("TRY")
-    #pragma pop_macro("GetCurrentTime")
     ```
-    Regarding the reason of using “GetCurrentTime” and “TRY” macros, please refer to:
-    https://docs.microsoft.com/en-us/windows/uwp/cpp-and-winrt-apis/faq
-
-    Using winrt namespaces in MFCAPPView.h and MFCAPP.h
+    
+    Using winrt namespaces in SimpleAPP.h
 
     ```C++
     using namespace winrt;
@@ -430,20 +424,20 @@ Add below properties to the ***MFCApp.vcxproj*** project file before the ***"<Im
     using namespace Windows::UI::Xaml::Controls;
     ```
 
-10.  Declare hostApp in ***MFCApp.h***
+10.  Declare hostApp in ***SimpleApp.cpp***
 
 ```C++
-public:
-	winrt::MyApp::App hostApp{ nullptr };
+winrt::MyApp::App hostApp{ nullptr };
+winrt::Windows::UI::Xaml::Hosting::DesktopWindowXamlSource _desktopWindowXamlSource{ nullptr };
+winrt::MyApp::MainUserControl _mainUserControl{ nullptr };
 ```
 
-11. Initalize hostApp right before new CMainFrame in  ***CMFCAppApp::InitInstance()*** in MFCApp.CPP
+11. Initalize hostApp right before new CMainFrame in  ***CMFCAppApp::InitInstance()*** in SimpleApp.CPP
 
 ```C++
-	hostApp = winrt::MyApp::App{};
-    <---Right Here--->
-    // create main MDI Frame window
-	CMainFrame* pMainFrame = new CMainFrame;
+	winrt::init_apartment(winrt::apartment_type::single_threaded);
+    hostApp = winrt::MyApp::App{};
+    _desktopWindowXamlSource = winrt::Windows::UI::Xaml::Hosting::DesktopWindowXamlSource{};
 ```
 
 11. Declare _desktopWindowXamlSource and our custom control in MFCAppView.h
