@@ -4,6 +4,14 @@
 #include "framework.h"
 #include "SimpleApp.h"
 
+
+using namespace winrt;
+using namespace Windows::UI;
+using namespace Windows::UI::Composition;
+using namespace Windows::UI::Xaml::Hosting;
+using namespace Windows::Foundation::Numerics;
+using namespace Windows::UI::Xaml::Controls;
+
 #define MAX_LOADSTRING 100
 
 // Global Variables:
@@ -15,11 +23,13 @@ winrt::MyApp::App hostApp{ nullptr };
 winrt::Windows::UI::Xaml::Hosting::DesktopWindowXamlSource _desktopWindowXamlSource{ nullptr };
 winrt::MyApp::MainUserControl _mainUserControl{ nullptr };
 
+
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
+
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -32,15 +42,18 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     // TODO: Place code here.
     winrt::init_apartment(winrt::apartment_type::single_threaded);
     hostApp = winrt::MyApp::App{};
-
     _desktopWindowXamlSource = winrt::Windows::UI::Xaml::Hosting::DesktopWindowXamlSource{};
-
 
     // Initialize global strings
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
     LoadStringW(hInstance, IDC_SIMPLEAPP, szWindowClass, MAX_LOADSTRING);
-    MyRegisterClass(hInstance);
+    //MyRegisterClass(hInstance);
 
+    if (MyRegisterClass(hInstance) == NULL)
+    {
+        MessageBox(NULL, L"Windows registration failed!", L"Error", NULL);
+        return 0;
+    }
     // Perform application initialization:
     if (!InitInstance (hInstance, nCmdShow))
     {
@@ -114,6 +127,25 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
       return FALSE;
    }
 
+   if (_desktopWindowXamlSource != nullptr)
+   {
+       // Get handle to corewindow
+       auto interop = _desktopWindowXamlSource.as<IDesktopWindowXamlSourceNative>();
+       // Parent the DesktopWindowXamlSource object to current window
+       check_hresult(interop->AttachToWindow(hWnd));
+
+       // This Hwnd will be the window handler for the Xaml Island: A child window that contains Xaml.  
+       HWND hWndXamlIsland = nullptr;
+       // Get the new child window's hwnd 
+       interop->get_WindowHandle(&hWndXamlIsland);
+
+       RECT windowRect;
+       ::GetWindowRect(hWnd, &windowRect);
+       ::SetWindowPos(hWndXamlIsland, NULL, 0, 0, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top, SWP_SHOWWINDOW);
+
+       _mainUserControl = winrt::MyApp::MainUserControl();
+       _desktopWindowXamlSource.Content(_mainUserControl);
+   }
    ShowWindow(hWnd, nCmdShow);
    UpdateWindow(hWnd);
 
@@ -134,24 +166,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
     {
-    case WM_CREATE:
-        
-        if (_desktopWindowXamlSource != nullptr)
-        {
-            auto interop = _desktopWindowXamlSource.as<IDesktopWindowXamlSourceNative>();
-            check_hresult(interop->AttachToWindow(hWnd));
-
-            HWND xamlHostHwnd = NULL;
-            check_hresult(interop->get_WindowHandle(&xamlHostHwnd));
-
-            _mainUserControl = winrt::MyApp::MainUserControl();
-            _desktopWindowXamlSource.Content(_mainUserControl);
-
-            RECT windowRect;
-            ::GetWindowRect(hWnd,&windowRect);
-            ::SetWindowPos(xamlHostHwnd, NULL, 0, 0, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top, SWP_SHOWWINDOW);
-
-        }
     case WM_COMMAND:
         {
             int wmId = LOWORD(wParam);
@@ -167,6 +181,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             default:
                 return DefWindowProc(hWnd, message, wParam, lParam);
             }
+
         }
         break;
     case WM_PAINT:
@@ -179,6 +194,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     case WM_DESTROY:
         PostQuitMessage(0);
+        if (_desktopWindowXamlSource != nullptr)
+        {
+            _desktopWindowXamlSource.Close();
+            _desktopWindowXamlSource = nullptr;
+        }
         break;
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);

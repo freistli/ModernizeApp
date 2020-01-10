@@ -15,6 +15,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		solution.props = solution.props
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Win32DesktopApp", "Win32DesktopApp\Win32DesktopApp.vcxproj", "{EAF23649-EF6E-478B-980E-81FAD96CCA2A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM = Debug|ARM
@@ -53,6 +55,16 @@ Global
 		{E9536ECF-AA1C-4E79-8504-D23DC656453C}.Release|x86.ActiveCfg = Release|Win32
 		{E9536ECF-AA1C-4E79-8504-D23DC656453C}.Release|x86.Build.0 = Release|Win32
 		{E9536ECF-AA1C-4E79-8504-D23DC656453C}.Release|x86.Deploy.0 = Release|Win32
+		{EAF23649-EF6E-478B-980E-81FAD96CCA2A}.Debug|ARM.ActiveCfg = Debug|Win32
+		{EAF23649-EF6E-478B-980E-81FAD96CCA2A}.Debug|x64.ActiveCfg = Debug|x64
+		{EAF23649-EF6E-478B-980E-81FAD96CCA2A}.Debug|x64.Build.0 = Debug|x64
+		{EAF23649-EF6E-478B-980E-81FAD96CCA2A}.Debug|x86.ActiveCfg = Debug|Win32
+		{EAF23649-EF6E-478B-980E-81FAD96CCA2A}.Debug|x86.Build.0 = Debug|Win32
+		{EAF23649-EF6E-478B-980E-81FAD96CCA2A}.Release|ARM.ActiveCfg = Release|Win32
+		{EAF23649-EF6E-478B-980E-81FAD96CCA2A}.Release|x64.ActiveCfg = Release|x64
+		{EAF23649-EF6E-478B-980E-81FAD96CCA2A}.Release|x64.Build.0 = Release|x64
+		{EAF23649-EF6E-478B-980E-81FAD96CCA2A}.Release|x86.ActiveCfg = Release|Win32
+		{EAF23649-EF6E-478B-980E-81FAD96CCA2A}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -400,7 +400,13 @@ Add below properties to the ***SimpleApp.vcxproj*** project file before the ***"
 
     <img src="../images/C++/20.png" width="400">
 
-9. Open framework.h, add below code to include necessary winrt header files:
+9. Open framework.h, remove this #define:
+
+    ```C++
+    #define WIN32_LEAN_AND_MEAN
+    ````
+
+10. In SimpleApp.h, add below code to include necessary winrt header files:
 
     ```C++
     #include <winrt/Windows.Foundation.Collections.h>
@@ -413,7 +419,7 @@ Add below properties to the ***SimpleApp.vcxproj*** project file before the ***"
     #include <winrt/myapp.h>
     ```
     
-    Using winrt namespaces in SimpleAPP.h
+ 11.   Using winrt namespaces in SimpleAPP.cpp
 
     ```C++
     using namespace winrt;
@@ -424,15 +430,19 @@ Add below properties to the ***SimpleApp.vcxproj*** project file before the ***"
     using namespace Windows::UI::Xaml::Controls;
     ```
 
-10.  Declare hostApp in ***SimpleApp.cpp***
+12.  Declare hostApp, _desktopWindowXamlSource and our custom control in ***SimpleApp.cpp***
 
 ```C++
-winrt::MyApp::App hostApp{ nullptr };
-winrt::Windows::UI::Xaml::Hosting::DesktopWindowXamlSource _desktopWindowXamlSource{ nullptr };
-winrt::MyApp::MainUserControl _mainUserControl{ nullptr };
+    UNREFERENCED_PARAMETER(hPrevInstance);
+    UNREFERENCED_PARAMETER(lpCmdLine);
+
+    // TODO: Place code here.
+    winrt::init_apartment(winrt::apartment_type::single_threaded);
+    hostApp = winrt::MyApp::App{};
+    _desktopWindowXamlSource = winrt::Windows::UI::Xaml::Hosting::DesktopWindowXamlSource{};
 ```
 
-11. Initalize hostApp right before new CMainFrame in  ***CMFCAppApp::InitInstance()*** in SimpleApp.CPP
+13. Initalize hostApp, _desktopWindowXamlSource in ***wWinMain*** in ***SimpleApp.CPP***
 
 ```C++
 	winrt::init_apartment(winrt::apartment_type::single_threaded);
@@ -440,46 +450,43 @@ winrt::MyApp::MainUserControl _mainUserControl{ nullptr };
     _desktopWindowXamlSource = winrt::Windows::UI::Xaml::Hosting::DesktopWindowXamlSource{};
 ```
 
-11. Declare _desktopWindowXamlSource and our custom control in MFCAppView.h
+14. Add below code in ***InitInstance*** in ***SimpleApp.cpp***
 
-```C++
-private:
-	winrt::Windows::UI::Xaml::Hosting::DesktopWindowXamlSource _desktopWindowXamlSource{ nullptr };
-	winrt::MyApp::TreeViewUserControl _treeViewUserControl{ nullptr };
-```
-
-12. Initialize _desktopWindowXamlSource and custom control in MFCAppView.cpp
-
-```C++
-if (_desktopWindowXamlSource == nullptr)
-{	
-    _desktopWindowXamlSource = DesktopWindowXamlSource{};
-    auto interop = _desktopWindowXamlSource.as<IDesktopWindowXamlSourceNative>();
-    check_hresult(interop->AttachToWindow(GetSafeHwnd()));
-
-    HWND xamlHostHwnd = NULL;
-    check_hresult(interop->get_WindowHandle(&xamlHostHwnd));
-
-    _treeViewUserControl = winrt::MyApp::TreeViewUserControl();
-    _desktopWindowXamlSource.Content(_treeViewUserControl);
-
-    RECT windowRect;
-		GetWindowRect(&windowRect);
-		::SetWindowPos(xamlHostHwnd, NULL, 0, 0, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top, SWP_SHOWWINDOW);
-}
-```
-13. Clean up resources when the view is disconstructed in MFCAppView.cpp
+    ```C++
+        if (_desktopWindowXamlSource != nullptr)
+       {
+           // Get handle to corewindow
+           auto interop = _desktopWindowXamlSource.as<IDesktopWindowXamlSourceNative>();
+           // Parent the DesktopWindowXamlSource object to current window
+           check_hresult(interop->AttachToWindow(hWnd));
+    
+           // This Hwnd will be the window handler for the Xaml Island: A child window that contains Xaml.  
+           HWND hWndXamlIsland = nullptr;
+           // Get the new child window's hwnd 
+           interop->get_WindowHandle(&hWndXamlIsland);
+    
+           RECT windowRect;
+           ::GetWindowRect(hWnd, &windowRect);
+           ::SetWindowPos(hWndXamlIsland, NULL, 0, 0, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top, SWP_SHOWWINDOW);
+    
+           _mainUserControl = winrt::MyApp::MainUserControl();
+           _desktopWindowXamlSource.Content(_mainUserControl);
+       }
+       ShowWindow(hWnd, nCmdShow);
+       UpdateWindow(hWnd);
+    ```
+15. Clean up resources when the view is disconstructed in MFCAppView.cpp
 
 
     ```C++
-    CMFCAppView::~CMFCAppView()
-    {
+     case WM_DESTROY:
+        PostQuitMessage(0);
         if (_desktopWindowXamlSource != nullptr)
         {
             _desktopWindowXamlSource.Close();
             _desktopWindowXamlSource = nullptr;
         }
-    }
+        break;
     ```
 
 14.  Add AdjustLayout function to make XAML content layout properly in MFCAppView.cpp

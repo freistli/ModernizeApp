@@ -121,7 +121,6 @@ BOOL CMFCAppApp::InitInstance()
 		return FALSE;
 	AddDocTemplate(pDocTemplate);
 
-//	winrt::init_apartment(winrt::apartment_type::single_threaded);
 	hostApp = winrt::MyApp::App{};
 
 	// create main MDI Frame window
