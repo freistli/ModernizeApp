@@ -489,139 +489,110 @@ Add below properties to the ***SimpleApp.vcxproj*** project file before the ***"
         break;
     ```
 
-14.  Add AdjustLayout function to make XAML content layout properly in MFCAppView.cpp
+16.  Add AdjustLayout function to make XAML content layout properly in SimpleApp.cpp
 :
 
     ```C++
-    void CMFCAppView::AdjustLayout()
+    void AdjustLayout(HWND hWnd)
     {
         if (_desktopWindowXamlSource != nullptr)
         {
             auto interop = _desktopWindowXamlSource.as<IDesktopWindowXamlSourceNative>();
             HWND xamlHostHwnd = NULL;
             check_hresult(interop->get_WindowHandle(&xamlHostHwnd));
-
+    
             RECT windowRect;
-            GetWindowRect(&windowRect);
+            ::GetWindowRect(hWnd, &windowRect);
             ::SetWindowPos(xamlHostHwnd, NULL, 0, 0, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top, SWP_SHOWWINDOW);
         }
     }
     ```
-
-    Don't forget to declare it in MFCAppView.h:
-
+17.  In SimpleApp.CPP handle WM_SIZE in the ***WinProc*** function: 
     ```C++
-    public:
-	    void AdjustLayout();
-    ```
-15.  Right click the MFCApp project, select **Class Wizard**
+        case WM_SIZE:
+            AdjustLayout(hWnd);
+    ```C++
+18. Now you can build and run this SimpleApp. It should display a button in the central of view window:
 
-     <img src="../images/MFC/9.png" width="300">
+    <img src="../images/C++/21.gif" width="400">
 
-     Add a handler to handle WM_SIZE so that when view size changes we can handle it: 
+## Using Ink Control in MyApp UWP Project
 
-     ![image](../images/MFC/10.png)
+1. Add an ***Assets*** file folder under ***SimpleApp*** on file system, add viewbackground.png file. And then create a new filter of "Assets", add this existing viewbackground.png into the ***Assets*** filter:
     
+    Set the file's **Content** property as **True**
 
-16.  Modify the OnSize method handler:
+    <img src="../images/C++/22.png" width="400">
 
-    ```C++
-    void CMFCAppView::OnSize(UINT nType, int cx, int cy)
-    {
-        CView::OnSize(nType, cx, cy);
-        AdjustLayout();
-    }
-    ```
+    > If you cannot see the ***viewbackground.png*** file, please click the "Show All Files" tool icon in the solution explorer window.
 
-17. Now you can build and run this MFCApp. It should display a button in the central of view window:
+2. Add the sample png file into ***Assets*** folder of ***MyApp***, and make its ***Content*** property as **True** as well.
 
-![image](../images/MFCCustomControl/21.gif)
-
-## Using WinUI in UWP Custom Control in MyApp UWP Project
-
-1. In MyApp, let's add the ***Microsoft.UI.Xaml*** nuget package:
-
-![image](../images/MFCCustomControl/22.png)
-
-> [!NOTE]
-> It is possible some version of WinUI nuget package doesn't create Microsoft.UI.Xaml.Controls class registering info into AppxManifest.xml, which is required by MFCApp later. This version used above works well. If you found MFCApp failed to run with "Class is not registered" error, please try this version.
-
-2. Modify App.Xaml, TreeViewUserControl.Xaml, pch.h and TreeViewUserContro.cpp as below:
-
-    > For detailed reasons on modifying these files, can refer to this [article](https://docs.microsoft.com/en-us/windows/uwp/cpp-and-winrt-apis/simple-winui-example)    
-
- Add the Windows UI (WinUI) Theme Resources to ***App.Xmal***
-
-```XML
-<Toolkit:XamlApplication
-    x:Class="MyApp.App"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:MyApp"
-    xmlns:Toolkit="using:Microsoft.Toolkit.Win32.UI.XamlHost"
-    xmlns:MSMarkup="using:Microsoft.UI.Xaml.Markup"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    RequestedTheme="Light"
-    mc:Ignorable="d">
-    <Toolkit:XamlApplication.Resources>
-        <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls"/>
-    </Toolkit:XamlApplication.Resources>
-</Toolkit:XamlApplication>
-```
-
-Add WinUI reference and WinUI TreeView control in ***TreeViewUserControl.Xaml***
+3. Modify MainUserControl.Xaml as below in ***MyApp***:
 
 ```XML
 <UserControl
-    x:Class="MyApp.TreeViewUserControl"
+    x:Class="MyApp.MainUserControl"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:MyApp"
-    xmlns:muxc="using:Microsoft.UI.Xaml.Controls" 
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-        <Button x:Name="Button" Click="ClickHandler">Click Me</Button>
-        <muxc:TreeView x:Name="WinUITreeView">
-            <muxc:TreeView.RootNodes>
-                <muxc:TreeViewNode Content="Flavors"
-                           IsExpanded="True">
-                    <muxc:TreeViewNode.Children>
-                        <muxc:TreeViewNode Content="Vanilla"/>
-                        <muxc:TreeViewNode Content="Strawberry"/>
-                        <muxc:TreeViewNode Content="Chocolate"/>
-                    </muxc:TreeViewNode.Children>
-                </muxc:TreeViewNode>
-            </muxc:TreeView.RootNodes>
-        </muxc:TreeView>
-    </StackPanel>
+    <RelativePanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <Image Source="assets/viewbackground.png" RelativePanel.AlignLeftWithPanel="True" 
+               RelativePanel.AlignRightWithPanel="True"
+               RelativePanel.AlignHorizontalCenterWithPanel="True"></Image>
+        <InkCanvas x:Name="ic" RelativePanel.AlignLeftWithPanel="True" 
+                   RelativePanel.AlignRightWithPanel="True" 
+                   RelativePanel.AlignBottomWithPanel="True"
+                   RelativePanel.AlignTopWithPanel="True"></InkCanvas>
+        <InkToolbar x:Name="it" HorizontalAlignment="Left" VerticalAlignment="Top"></InkToolbar>
+    </RelativePanel>
 </UserControl>
-```
-Include WinUI winrt header files in ***pch.h***
 
-```C++
-#include "winrt/Microsoft.UI.Xaml.Controls.h"
-#include "winrt/Microsoft.UI.Xaml.XamlTypeInfo.h"
 ```
 
-***TreeViewUserControl.cpp***
+4. Add below code in MainUserControl.CPP, remove the Button ClickHandler code as we don't use it now:
 
-```C++
-void TreeViewUserControl::ClickHandler(IInspectable const&, RoutedEventArgs const&)
-    {
-        Button().Content(box_value(L"Clicked"));
-        winrt::Microsoft::UI::Xaml::Controls::TreeViewNode tn = winrt::Microsoft::UI::Xaml::Controls::TreeViewNode{};
-        tn.Content(winrt::box_value(L"Clicked"));
-        WinUITreeView().RootNodes().First().Current().Children().Append(tn);
-    }
-```
+    ```C++
+        MainUserControl::MainUserControl()
+        {
+            InitializeComponent();
+            ic().InkPresenter().InputDeviceTypes((winrt::Windows::UI::Core::CoreInputDeviceTypes)7);
+            it().TargetInkCanvas(ic());
+        }
+    ```
 
-3. Build and run MFCApp, if steps have been taken exactly as above, it will show as below:
+5. Include more winrt header files in MainUserControl.h:
 
-![image](../images/MFCCustomControl/23.gif)
+    ```C++
+    #include <winrt/Windows.UI.Input.Inking.h>
+    #include <winrt/Windows.UI.Xaml.Media.Imaging.h>
+    ```
+6. Build and run Simple, if steps have been taken exactly as above, it will show as below:
+
+    <img src="../images/C++/23.png" width="400">
+
+7. You may notice that it doesn't display the background image, this is because the uri **assets/viewbackground.png** needs to be used UWP package. In Visual Studio, with **"Windows Application Packaging Project (C++)"**, it is easily to packaging our SimpleApp project:
+
+<img src="../images/MFC/16.png" Width=400>
+
+Create the packaging project in the solution, right click the **Application** node, and select **Add Reference**, add SimpleApp. Now the packaging project structure is like:
+
+<img src="../images/C++/24.png" Width=200>
+
+For more information about packaging project, refer to:
+[Package a desktop app from source code using Visual Studio](https://docs.microsoft.com/en-us/windows/msix/desktop/desktop-to-uwp-packaging-dot-net)
+
+After this, choose the packaging project as Start Up project, Ctrl+F5 to run it. We can see the expected result will show up:
+
+<img src="../images/C++/25.png" Width=400>
+
+Further more, you can publish this packaging app as MSIX or APPX, and easily deploy it:
+
+[Package a UWP app with Visual Studio](https://docs.microsoft.com/en-us/windows/msix/desktop/desktop-to-uwp-r2r)
 
 ## Wrap Up
-This article gives detailed steps on how to leverage XamplApplication to host custom XAML control in document view of traditional MFC Mulitple Document Interface project, and the important thing is you can use WinUI to modernize the MFC application now. The whole smaple solution can be found from this repo: https://github.com/freistli/ModernizeApp/tree/master/MFC/MFCAppWinUI
+This article gives detailed steps on how to leverage XamplApplication to host standard XAML control in C++ Win32 project, with this method, it is flexible to leverage Win10 Controls in Win32 project. The whole sample solution can be found from this repo: https://github.com/freistli/ModernizeApp/tree/master/C%2B%2B/SimpleApp

@@ -152,6 +152,19 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    return TRUE;
 }
 
+void AdjustLayout(HWND hWnd)
+{
+    if (_desktopWindowXamlSource != nullptr)
+    {
+        auto interop = _desktopWindowXamlSource.as<IDesktopWindowXamlSourceNative>();
+        HWND xamlHostHwnd = NULL;
+        check_hresult(interop->get_WindowHandle(&xamlHostHwnd));
+
+        RECT windowRect;
+        ::GetWindowRect(hWnd, &windowRect);
+        ::SetWindowPos(xamlHostHwnd, NULL, 0, 0, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top, SWP_SHOWWINDOW);
+    }
+}
 //
 //  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
 //
@@ -166,6 +179,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
     {
+    case WM_SIZE:
+        AdjustLayout(hWnd);
     case WM_COMMAND:
         {
             int wmId = LOWORD(wParam);

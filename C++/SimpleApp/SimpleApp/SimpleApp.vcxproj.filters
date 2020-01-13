@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Assets">
+      <UniqueIdentifier>{4292187d-1404-4cf6-a48b-47b9063f3e0f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -43,6 +46,9 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="SimpleApp.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Assets\viewbackground.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

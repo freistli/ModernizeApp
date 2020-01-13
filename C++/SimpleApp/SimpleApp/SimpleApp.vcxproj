@@ -114,6 +114,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(GeneratedFilesDir)；$(AppIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -169,6 +170,9 @@
     <ResourceCompile Include="SimpleApp.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="Assets\viewbackground.png">
+      <DeploymentContent>true</DeploymentContent>
+    </Image>
     <Image Include="SimpleApp.ico" />
     <Image Include="small.ico" />
   </ItemGroup>

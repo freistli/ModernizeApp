@@ -7,7 +7,14 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-        <Button x:Name="Button" Click="ClickHandler">Click Me</Button>
-    </StackPanel>
+    <RelativePanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <Image Source="assets/viewbackground.png" RelativePanel.AlignLeftWithPanel="True" 
+               RelativePanel.AlignRightWithPanel="True"
+               RelativePanel.AlignHorizontalCenterWithPanel="True"></Image>
+        <InkCanvas x:Name="ic" RelativePanel.AlignLeftWithPanel="True" 
+                   RelativePanel.AlignRightWithPanel="True" 
+                   RelativePanel.AlignBottomWithPanel="True"
+                   RelativePanel.AlignTopWithPanel="True"></InkCanvas>
+        <InkToolbar x:Name="it" HorizontalAlignment="Left" VerticalAlignment="Top"></InkToolbar>
+    </RelativePanel>
 </UserControl>

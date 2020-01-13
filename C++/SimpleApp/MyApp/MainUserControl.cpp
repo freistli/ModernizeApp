@@ -12,6 +12,8 @@ namespace winrt::MyApp::implementation
     MainUserControl::MainUserControl()
     {
         InitializeComponent();
+        ic().InkPresenter().InputDeviceTypes((winrt::Windows::UI::Core::CoreInputDeviceTypes)7);
+        it().TargetInkCanvas(ic());
     }
 
     int32_t MainUserControl::MyProperty()
@@ -24,8 +26,10 @@ namespace winrt::MyApp::implementation
         throw hresult_not_implemented();
     }
 
+    /*
     void MainUserControl::ClickHandler(IInspectable const&, RoutedEventArgs const&)
     {
         Button().Content(box_value(L"Clicked"));
     }
+    */
 }
