@@ -1,0 +1,9 @@
+namespace MyAppWinUI3
+{
+    [default_interface]
+    runtimeclass BlankPage : Microsoft.UI.Xaml.Controls.Page
+    {
+        BlankPage();
+        Int32 MyProperty;
+    }
+}
