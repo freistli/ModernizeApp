@@ -1,0 +1,428 @@
+<h1 id="host-custom-uwp-controls-in-c-win32-project-using-xaml-islands">Host Custom UWP Controls in C++ Win32 Project using XAML Islands</h1>
+<p>This article explains how to modernize C++ Win32 project with custom UWP Controls through XAML Islands in detail. With custom UWP controls, it allows us to define control layout easily through XAML pages. Not only putting standard UWP controls into the custom control, we can also integrate other custom controls as well, such as latest WinUI controls. We will use a new Xaml Application project to bring the custom UWP controls into our C++ Win32 project. This <a href="https://docs.microsoft.com/en-us/windows/apps/desktop/modernize/using-the-xaml-hosting-api#host-a-custom-uwp-control">article</a> has mentioned how to use the new XAML application in Win32 C++ application, we will give more detailed steps.</p>
+<p>Overall, in our solution, we will have two parts to demonstrate this method:</p>
+<ul>
+<li><p>C++ Win32 Project</p></li>
+<li><p>A companion UWP app project that defines a XamlApplication object.</p>
+<p>In this project, we will define a custom UWP control and export it so that C++ Win32 can use the custom UWP control.</p></li>
+</ul>
+<h2 id="development-environment">Development Environment</h2>
+<ul>
+<li>Visual Studio 2019 (16.3.6)<br />
+</li>
+<li>Windows 10 1909 (18363.476)<br />
+</li>
+<li>Windows 10 SDK (10.0.18362.1)</li>
+</ul>
+<h2 id="configure-c-win32-project">Configure C++ Win32 Project</h2>
+<ol type="1">
+<li><p>Create C++ Win32 in Visual Studio 2019, will name it SimpleApp</p>
+<p><img src="../images/C++/01.png" width="300"></p></li>
+<li><p>In Solution Explorer, right-click the Simple project node, click <strong>Retarget Project</strong>, select the <strong>10.0.18362.0</strong> or a later SDK release, and then click OK.</p>
+<p><img src="../images/MFC/3.png" width="300"></p>
+<p><img src="../images/C++/02.png" width="300"></p></li>
+<li><p>Install the <strong><em>Microsoft.Windows.CppWinRT</em></strong> NuGet package:</p>
+<ol type="a">
+<li><p>Right-click the project in Solution Explorer and choose <strong><em>Manage NuGet Packages</em></strong>.</p></li>
+<li><p>Select the Browse tab, search for the <strong>Microsoft.Windows.CppWinRT</strong> package, and install the latest version of this package.</p></li>
+</ol>
+<p><img src="../images/C++/03.png" width="400"></p>
+<p>After install the nuget package, check the SimpleApp project properties, you will notice its C++ version is ISO C++17, which is required by C++/WinRT:</p>
+<p><img src="../images/C++/04.png" width="400"></p>
+<p>Build this SimpleApp, we can see winrt projected files are generated in the “Generated Files” folder:</p>
+<p><img src="../images/C++/05.png" width="400"></p></li>
+<li><p>Install the <strong>Microsoft.Toolkit.Win32.UI.SDK</strong> NuGet package:</p>
+<ol type="a">
+<li>In the NuGet Package Manager window, make sure that Include prerelease is selected.<br />
+</li>
+<li>Select the Browse tab, search for the <strong>Microsoft.Toolkit.Win32.UI.SDK</strong> package, and install version v6.0.0 (or Later) of this package.</li>
+</ol>
+<p><img src="../images/C++/06.png" width="400"></p></li>
+<li><p>Install the <strong><em>Microsoft.VCRTForwarders.140</em></strong> nuget package as well. Running Custom UWP Control in this project will require VC libs.</p>
+<p><img src="../images/C++/7.png" width="400"></p></li>
+</ol>
+<h2 id="configure-uwp-project">Configure UWP Project</h2>
+<ol type="1">
+<li><p>In Solution Explorer, right-click the solution node and select Add -&gt; New Project.</p></li>
+<li><p>Add a Blank App (C++/WinRT) project to your solution.</p>
+<p><img src="../images/MFCCustomControl/1.png" width="300"></p></li>
+<li><p>Give it a name <strong><em>MyApp</em></strong>, and create it, Make sure the target version and minimum version are <strong><em>both</em></strong> set to <strong><em>Windows 10, version 1903</em></strong> or later.</p>
+<p><img src="../images/C++/8.png" width="300"></p></li>
+<li><p>Right click the MyApp and open its properties, make sure its C++/WinRT configuration is as below:</p>
+<p><img src="../images/MFCCustomControl/3.png" width="400"></p></li>
+<li><p>Change its output type from .EXE to <strong><em>Dynamic Library</em></strong></p>
+<p><img src="../images/MFCCustomControl/4.png" width="400"></p></li>
+<li><p>Save a dummy.exe into the <strong><em>MyApp</em></strong> folder. It doesn’t need to be a real exe, just input “dummy exe file” in notepad, and save it as <strong><em>dummy.exe</em></strong>.</p>
+<p><img src="../images/MFCCustomControl/5.png" width="200"></p>
+<p><img src="../images/C++/9.png" width="300"></p>
+<p>Add the dummy.exe into MyApp project, and make sure the Content property of dummy.exe is <strong><em>True</em></strong>.</p>
+<p><img src="../images/C++/10.png" width="300"></p></li>
+<li><p>Now edit Package.appxmanifest, change the Executable attribute to “dummy.exe”</p>
+<p><img src="../images/MFCCustomControl/7.png" width="500"></p></li>
+<li><p>Right click the <strong><em>MyApp</em></strong> project, select <strong><em>Unload Project</em></strong></p></li>
+<li><p>Right click the <strong><em>MyApp (Unloaded)</em></strong> project, select <strong><em>Edit MyApp.vcxproj</em></strong></p></li>
+<li><p>Add below properties to the <strong><em>MyApp.vcxproj</em></strong> project file:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode xml"><code class="sourceCode xml"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">&lt;PropertyGroup</span><span class="ot"> Label=</span><span class="st">&quot;Globals&quot;</span><span class="kw">&gt;</span></span>
+<span id="cb1-2"><a href="#cb1-2"></a>    <span class="kw">&lt;WindowsAppContainer&gt;</span>true<span class="kw">&lt;/WindowsAppContainer&gt;</span></span>
+<span id="cb1-3"><a href="#cb1-3"></a>    <span class="kw">&lt;AppxGeneratePriEnabled&gt;</span>true<span class="kw">&lt;/AppxGeneratePriEnabled&gt;</span></span>
+<span id="cb1-4"><a href="#cb1-4"></a>    <span class="kw">&lt;ProjectPriIndexName&gt;</span>App<span class="kw">&lt;/ProjectPriIndexName&gt;</span></span>
+<span id="cb1-5"><a href="#cb1-5"></a>    <span class="kw">&lt;AppxPackage&gt;</span>true<span class="kw">&lt;/AppxPackage&gt;</span></span>
+<span id="cb1-6"><a href="#cb1-6"></a>  <span class="kw">&lt;/PropertyGroup&gt;</span></span></code></pre></div>
+<p>For example:</p>
+<p><img src="../images/MFCCustomControl/8.png" width="500"></p></li>
+<li><p>Right click the <strong><em>MyApp (Unloaded)</em></strong> project, select <strong><em>Reload Project</em></strong>.</p></li>
+<li><p>Right click <strong><em>Mainpage.xml</em></strong>, select <strong><em>Remove</em></strong>. And then click <strong><em>Delete</em></strong></p>
+<p><img src="../images/C++/11.png" width="300"></p></li>
+<li><p>Copy App.Xaml, App.cpp, App.h, App.idl contents to overwrite current ones:</p>
+<p><strong><em>App.Xaml</em></strong></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode xml"><code class="sourceCode xml"><span id="cb2-1"><a href="#cb2-1"></a><span class="kw">&lt;Toolkit:XamlApplication</span></span>
+<span id="cb2-2"><a href="#cb2-2"></a><span class="ot">    x:Class=</span><span class="st">&quot;MyApp.App&quot;</span></span>
+<span id="cb2-3"><a href="#cb2-3"></a><span class="ot">    xmlns=</span><span class="st">&quot;http://schemas.microsoft.com/winfx/2006/xaml/presentation&quot;</span></span>
+<span id="cb2-4"><a href="#cb2-4"></a><span class="ot">    xmlns:x=</span><span class="st">&quot;http://schemas.microsoft.com/winfx/2006/xaml&quot;</span></span>
+<span id="cb2-5"><a href="#cb2-5"></a><span class="ot">    xmlns:local=</span><span class="st">&quot;using:MyApp&quot;</span></span>
+<span id="cb2-6"><a href="#cb2-6"></a><span class="ot">    xmlns:Toolkit=</span><span class="st">&quot;using:Microsoft.Toolkit.Win32.UI.XamlHost&quot;</span></span>
+<span id="cb2-7"><a href="#cb2-7"></a><span class="ot">    xmlns:d=</span><span class="st">&quot;http://schemas.microsoft.com/expression/blend/2008&quot;</span></span>
+<span id="cb2-8"><a href="#cb2-8"></a><span class="ot">    xmlns:mc=</span><span class="st">&quot;http://schemas.openxmlformats.org/markup-compatibility/2006&quot;</span></span>
+<span id="cb2-9"><a href="#cb2-9"></a><span class="ot">    RequestedTheme=</span><span class="st">&quot;Light&quot;</span></span>
+<span id="cb2-10"><a href="#cb2-10"></a><span class="ot">    mc:Ignorable=</span><span class="st">&quot;d&quot;</span><span class="kw">&gt;</span></span>
+<span id="cb2-11"><a href="#cb2-11"></a><span class="kw">&lt;/Toolkit:XamlApplication&gt;</span></span></code></pre></div>
+<p><strong><em>App.cpp</em></strong></p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb3-1"><a href="#cb3-1"></a><span class="pp">#include </span><span class="im">&quot;pch.h&quot;</span></span>
+<span id="cb3-2"><a href="#cb3-2"></a><span class="pp">#include </span><span class="im">&quot;App.h&quot;</span></span>
+<span id="cb3-3"><a href="#cb3-3"></a></span>
+<span id="cb3-4"><a href="#cb3-4"></a><span class="kw">using</span> <span class="kw">namespace</span> winrt;</span>
+<span id="cb3-5"><a href="#cb3-5"></a><span class="kw">using</span> <span class="kw">namespace</span> Windows::UI::Xaml;</span>
+<span id="cb3-6"><a href="#cb3-6"></a></span>
+<span id="cb3-7"><a href="#cb3-7"></a><span class="kw">namespace</span> winrt::MyApp::implementation</span>
+<span id="cb3-8"><a href="#cb3-8"></a>{</span>
+<span id="cb3-9"><a href="#cb3-9"></a>    App::App()</span>
+<span id="cb3-10"><a href="#cb3-10"></a>    {</span>
+<span id="cb3-11"><a href="#cb3-11"></a>        Initialize();</span>
+<span id="cb3-12"><a href="#cb3-12"></a></span>
+<span id="cb3-13"><a href="#cb3-13"></a>        AddRef();</span>
+<span id="cb3-14"><a href="#cb3-14"></a>        <span class="va">m_inner</span>.as&lt;::IUnknown&gt;()-&gt;Release();</span>
+<span id="cb3-15"><a href="#cb3-15"></a>    }</span>
+<span id="cb3-16"><a href="#cb3-16"></a></span>
+<span id="cb3-17"><a href="#cb3-17"></a>    App::~App()</span>
+<span id="cb3-18"><a href="#cb3-18"></a>    {</span>
+<span id="cb3-19"><a href="#cb3-19"></a>        Close();</span>
+<span id="cb3-20"><a href="#cb3-20"></a>    }</span>
+<span id="cb3-21"><a href="#cb3-21"></a>}</span></code></pre></div>
+<p><strong><em>App.h</em></strong></p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb4-1"><a href="#cb4-1"></a><span class="co">//</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a><span class="co">// Declaration of the App class.</span></span>
+<span id="cb4-3"><a href="#cb4-3"></a><span class="co">//</span></span>
+<span id="cb4-4"><a href="#cb4-4"></a></span>
+<span id="cb4-5"><a href="#cb4-5"></a><span class="pp">#pragma once</span></span>
+<span id="cb4-6"><a href="#cb4-6"></a></span>
+<span id="cb4-7"><a href="#cb4-7"></a><span class="pp">#include </span><span class="im">&quot;App.g.h&quot;</span></span>
+<span id="cb4-8"><a href="#cb4-8"></a><span class="pp">#include </span><span class="im">&quot;App.base.h&quot;</span></span>
+<span id="cb4-9"><a href="#cb4-9"></a></span>
+<span id="cb4-10"><a href="#cb4-10"></a><span class="kw">namespace</span> winrt::MyApp::implementation</span>
+<span id="cb4-11"><a href="#cb4-11"></a>{</span>
+<span id="cb4-12"><a href="#cb4-12"></a>    <span class="kw">class</span> App : <span class="kw">public</span> AppT2&lt;App&gt;</span>
+<span id="cb4-13"><a href="#cb4-13"></a>    {</span>
+<span id="cb4-14"><a href="#cb4-14"></a>    <span class="kw">public</span>:</span>
+<span id="cb4-15"><a href="#cb4-15"></a>        App();</span>
+<span id="cb4-16"><a href="#cb4-16"></a>        ~App();</span>
+<span id="cb4-17"><a href="#cb4-17"></a>    };</span>
+<span id="cb4-18"><a href="#cb4-18"></a>}</span>
+<span id="cb4-19"><a href="#cb4-19"></a></span>
+<span id="cb4-20"><a href="#cb4-20"></a><span class="kw">namespace</span> winrt::MyApp::factory_implementation</span>
+<span id="cb4-21"><a href="#cb4-21"></a>{</span>
+<span id="cb4-22"><a href="#cb4-22"></a>    <span class="kw">class</span> App : <span class="kw">public</span> AppT&lt;App, implementation::App&gt;</span>
+<span id="cb4-23"><a href="#cb4-23"></a>    {</span>
+<span id="cb4-24"><a href="#cb4-24"></a>    };</span>
+<span id="cb4-25"><a href="#cb4-25"></a>}</span></code></pre></div>
+<p><strong><em>App.idl</em></strong></p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb5-1"><a href="#cb5-1"></a><span class="kw">namespace</span> MyApp</span>
+<span id="cb5-2"><a href="#cb5-2"></a>{</span>
+<span id="cb5-3"><a href="#cb5-3"></a>    [default_interface]</span>
+<span id="cb5-4"><a href="#cb5-4"></a>    runtimeclass App: Microsoft.Toolkit.Win32.UI.XamlHost.XamlApplication</span>
+<span id="cb5-5"><a href="#cb5-5"></a>    {</span>
+<span id="cb5-6"><a href="#cb5-6"></a>        App();</span>
+<span id="cb5-7"><a href="#cb5-7"></a>    }</span>
+<span id="cb5-8"><a href="#cb5-8"></a>}</span></code></pre></div></li>
+<li><p>Create app.base.h in this MyApp project, and use below content:</p>
+<p><strong><em>app.base.h</em></strong></p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb6-1"><a href="#cb6-1"></a><span class="pp">#pragma once</span></span>
+<span id="cb6-2"><a href="#cb6-2"></a></span>
+<span id="cb6-3"><a href="#cb6-3"></a><span class="kw">namespace</span> winrt::MyApp::implementation</span>
+<span id="cb6-4"><a href="#cb6-4"></a>{</span>
+<span id="cb6-5"><a href="#cb6-5"></a>    <span class="kw">template</span> &lt;<span class="kw">typename</span> D, <span class="kw">typename</span>... I&gt;</span>
+<span id="cb6-6"><a href="#cb6-6"></a>    <span class="kw">struct</span> App_baseWithProvider : <span class="kw">public</span> App_base&lt;D, ::winrt::Windows::UI::Xaml::Markup::IXamlMetadataProvider&gt;</span>
+<span id="cb6-7"><a href="#cb6-7"></a>    {</span>
+<span id="cb6-8"><a href="#cb6-8"></a>        <span class="kw">using</span> IXamlType = ::winrt::Windows::UI::Xaml::Markup::IXamlType;</span>
+<span id="cb6-9"><a href="#cb6-9"></a></span>
+<span id="cb6-10"><a href="#cb6-10"></a>        IXamlType GetXamlType(::winrt::Windows::UI::Xaml::Interop::TypeName <span class="at">const</span>&amp; type)</span>
+<span id="cb6-11"><a href="#cb6-11"></a>        {</span>
+<span id="cb6-12"><a href="#cb6-12"></a>            <span class="cf">return</span> AppProvider()-&gt;GetXamlType(type);</span>
+<span id="cb6-13"><a href="#cb6-13"></a>        }</span>
+<span id="cb6-14"><a href="#cb6-14"></a></span>
+<span id="cb6-15"><a href="#cb6-15"></a>        IXamlType GetXamlType(::winrt::hstring <span class="at">const</span>&amp; fullName)</span>
+<span id="cb6-16"><a href="#cb6-16"></a>        {</span>
+<span id="cb6-17"><a href="#cb6-17"></a>            <span class="cf">return</span> AppProvider()-&gt;GetXamlType(fullName);</span>
+<span id="cb6-18"><a href="#cb6-18"></a>        }</span>
+<span id="cb6-19"><a href="#cb6-19"></a></span>
+<span id="cb6-20"><a href="#cb6-20"></a>        ::winrt::com_array&lt;::winrt::Windows::UI::Xaml::Markup::XmlnsDefinition&gt; GetXmlnsDefinitions()</span>
+<span id="cb6-21"><a href="#cb6-21"></a>        {</span>
+<span id="cb6-22"><a href="#cb6-22"></a>            <span class="cf">return</span> AppProvider()-&gt;GetXmlnsDefinitions();</span>
+<span id="cb6-23"><a href="#cb6-23"></a>        }</span>
+<span id="cb6-24"><a href="#cb6-24"></a></span>
+<span id="cb6-25"><a href="#cb6-25"></a>    <span class="kw">private</span>:</span>
+<span id="cb6-26"><a href="#cb6-26"></a>        <span class="dt">bool</span> _contentLoaded{ <span class="kw">false</span> };</span>
+<span id="cb6-27"><a href="#cb6-27"></a>        <span class="bu">std::</span>shared_ptr&lt;XamlMetaDataProvider&gt; _appProvider;</span>
+<span id="cb6-28"><a href="#cb6-28"></a>        <span class="bu">std::</span>shared_ptr&lt;XamlMetaDataProvider&gt; AppProvider()</span>
+<span id="cb6-29"><a href="#cb6-29"></a>        {</span>
+<span id="cb6-30"><a href="#cb6-30"></a>            <span class="cf">if</span> (!_appProvider)</span>
+<span id="cb6-31"><a href="#cb6-31"></a>            {</span>
+<span id="cb6-32"><a href="#cb6-32"></a>                _appProvider = <span class="bu">std::</span>make_shared&lt;XamlMetaDataProvider&gt;();</span>
+<span id="cb6-33"><a href="#cb6-33"></a>            }</span>
+<span id="cb6-34"><a href="#cb6-34"></a>            <span class="cf">return</span> _appProvider;</span>
+<span id="cb6-35"><a href="#cb6-35"></a>        }</span>
+<span id="cb6-36"><a href="#cb6-36"></a>    };</span>
+<span id="cb6-37"><a href="#cb6-37"></a></span>
+<span id="cb6-38"><a href="#cb6-38"></a>    <span class="kw">template</span> &lt;<span class="kw">typename</span> D, <span class="kw">typename</span>... I&gt;</span>
+<span id="cb6-39"><a href="#cb6-39"></a>    <span class="kw">using</span> AppT2 = App_baseWithProvider&lt;D, I...&gt;;</span>
+<span id="cb6-40"><a href="#cb6-40"></a>}</span>
+<span id="cb6-41"><a href="#cb6-41"></a></span></code></pre></div></li>
+<li><p>Install <a href="https://www.nuget.org/packages/Microsoft.Toolkit.Win32.UI.XamlApplication">Microsoft.Toolkit.Win32.UI.XamlApplication</a> Nuget package.</p></li>
+<li><p>If you build <strong><em>MyApp</em></strong> now, it should create MyApp.dll without any error.</p></li>
+</ol>
+<h2 id="centralize-output-input-and-cwinrt-files-in-solution">Centralize Output, Input and C++/WinRT files in Solution</h2>
+<p>This step is necessary for our next steps because we need to include winrt header files in different projects properly, and MFCApp also needs to reference MyApp resource files.</p>
+<ol type="1">
+<li><p>Add a new <strong><em>Solution.Props</em></strong> file by right clicking the <strong><em>solution</em></strong> node, and select Add -&gt; New Item:</p>
+<p><img src="../images/MFCCustomControl/13.png" width="400"></p></li>
+<li><p>Use below content to overwrite the Solution.Props:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode xml"><code class="sourceCode xml"><span id="cb7-1"><a href="#cb7-1"></a><span class="kw">&lt;?xml</span> version=&quot;1.0&quot; encoding=&quot;utf-8&quot;<span class="kw">?&gt;</span></span>
+<span id="cb7-2"><a href="#cb7-2"></a><span class="kw">&lt;Project</span><span class="ot"> xmlns=</span><span class="st">&quot;http://schemas.microsoft.com/developer/msbuild/2003&quot;</span><span class="kw">&gt;</span></span>
+<span id="cb7-3"><a href="#cb7-3"></a>  <span class="kw">&lt;PropertyGroup&gt;</span></span>
+<span id="cb7-4"><a href="#cb7-4"></a>    <span class="kw">&lt;IntDir&gt;</span>$(SolutionDir)\obj\$(Platform)\$(Configuration)\$(MSBuildProjectName)\<span class="kw">&lt;/IntDir&gt;</span></span>
+<span id="cb7-5"><a href="#cb7-5"></a>    <span class="kw">&lt;OutDir&gt;</span>$(SolutionDir)\bin\$(Platform)\$(Configuration)\$(MSBuildProjectName)\<span class="kw">&lt;/OutDir&gt;</span></span>
+<span id="cb7-6"><a href="#cb7-6"></a>    <span class="kw">&lt;GeneratedFilesDir&gt;</span>$(IntDir)Generated Files\<span class="kw">&lt;/GeneratedFilesDir&gt;</span></span>
+<span id="cb7-7"><a href="#cb7-7"></a>  <span class="kw">&lt;/PropertyGroup&gt;</span></span>
+<span id="cb7-8"><a href="#cb7-8"></a><span class="kw">&lt;/Project&gt;</span></span></code></pre></div></li>
+<li><p>Click Views -&gt; Other Windows -&gt; Property Manager</p>
+<p><img src="../images/C++/12.png" width="200"></p></li>
+<li><p>Right click <strong><em>SimpleApp</em></strong>, select <strong><em>Add Existing Property Sheet</em></strong>, add the new <strong><em>solution.props</em></strong> file</p>
+<p><img src="../images/C++/13.png" width="300"></p></li>
+<li><p>Repeat the step 4. for <strong><em>MyApp</em></strong>. We can close the Property Manager window now.</p></li>
+<li><p>Right click the project node <strong><em>MFCApp</em></strong>, select Properties.</p>
+<p>If you see the Outut and Intermidiate directries are already become as below, then can skip this step:</p>
+<p>$(SolutionDir)$(Platform)$(Configuration)$(MSBuildProjectName)<br />
+and $(SolutionDir)$(Platform)$(Configuration)$(MSBuildProjectName)<br />
+</p>
+<p>Otherwise please manually set：</p>
+<p>Output Directory: $(OutDir)</p>
+<p>Intermidia Directory: $(IntDir)</p>
+<p><img src="../images/MFCCustomControl/12.png" width="400"></p></li>
+<li><p>Repeat the step 6 for <strong><em>MyApp</em></strong>.</p></li>
+<li><p>Right click the Solution node, and choose <strong><em>Project Dependencies</em></strong>, make sure SimpleApp depends on MyApp:</p>
+<p><img src="../images/C++/15.png" width="200"></p></li>
+<li><p>Rebuild the whole solution, it should work without errors.</p></li>
+</ol>
+<h2 id="add-uwp-custom-xaml-control-to-myapp">Add UWP Custom XAML Control to MyApp</h2>
+<ol type="1">
+<li><p>Right click <strong><em>MyApp</em></strong>, select Add -&gt; New Item</p></li>
+<li><p>Create <strong><em>Blank User Conrol (C++/WinRT)</em></strong>, here we call it MainUserControl:</p>
+<p><img src="../images/C++/16.png" width="400"></p></li>
+</ol>
+<h2 id="integrate-custom-xaml-control-in-simpleapp">Integrate Custom XAML Control in SimpleApp</h2>
+<ol type="1">
+<li><p>Add one XML file <strong>app.manifest</strong> in your project with below content to register custom control type:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode xml"><code class="sourceCode xml"><span id="cb8-1"><a href="#cb8-1"></a><span class="kw">&lt;?xml</span> version=&quot;1.0&quot; encoding=&quot;utf-8&quot; standalone=&quot;yes&quot;<span class="kw">?&gt;</span></span>
+<span id="cb8-2"><a href="#cb8-2"></a><span class="kw">&lt;assembly</span></span>
+<span id="cb8-3"><a href="#cb8-3"></a><span class="ot">    xmlns=</span><span class="st">&quot;urn:schemas-microsoft-com:asm.v1&quot;</span></span>
+<span id="cb8-4"><a href="#cb8-4"></a><span class="ot">    xmlns:asmv3=</span><span class="st">&quot;urn:schemas-microsoft-com:asm.v3&quot;</span></span>
+<span id="cb8-5"><a href="#cb8-5"></a><span class="ot">    manifestVersion=</span><span class="st">&quot;1.0&quot;</span><span class="kw">&gt;</span></span>
+<span id="cb8-6"><a href="#cb8-6"></a>    <span class="kw">&lt;asmv3:file</span><span class="ot"> name=</span><span class="st">&quot;MyApp.dll&quot;</span><span class="kw">&gt;</span></span>
+<span id="cb8-7"><a href="#cb8-7"></a>        <span class="kw">&lt;activatableClass</span></span>
+<span id="cb8-8"><a href="#cb8-8"></a><span class="ot">            name=</span><span class="st">&quot;MyApp.App&quot;</span></span>
+<span id="cb8-9"><a href="#cb8-9"></a><span class="ot">            threadingModel=</span><span class="st">&quot;both&quot;</span></span>
+<span id="cb8-10"><a href="#cb8-10"></a><span class="ot">            xmlns=</span><span class="st">&quot;urn:schemas-microsoft-com:winrt.v1&quot;</span> <span class="kw">/&gt;</span></span>
+<span id="cb8-11"><a href="#cb8-11"></a>        <span class="kw">&lt;activatableClass</span></span>
+<span id="cb8-12"><a href="#cb8-12"></a><span class="ot">            name=</span><span class="st">&quot;MyApp.XamlMetadataProvider&quot;</span></span>
+<span id="cb8-13"><a href="#cb8-13"></a><span class="ot">            threadingModel=</span><span class="st">&quot;both&quot;</span></span>
+<span id="cb8-14"><a href="#cb8-14"></a><span class="ot">            xmlns=</span><span class="st">&quot;urn:schemas-microsoft-com:winrt.v1&quot;</span> <span class="kw">/&gt;</span></span>
+<span id="cb8-15"><a href="#cb8-15"></a>        <span class="kw">&lt;activatableClass</span></span>
+<span id="cb8-16"><a href="#cb8-16"></a><span class="ot">            name=</span><span class="st">&quot;MyApp.MainUserControl&quot;</span></span>
+<span id="cb8-17"><a href="#cb8-17"></a><span class="ot">            threadingModel=</span><span class="st">&quot;both&quot;</span></span>
+<span id="cb8-18"><a href="#cb8-18"></a><span class="ot">            xmlns=</span><span class="st">&quot;urn:schemas-microsoft-com:winrt.v1&quot;</span> <span class="kw">/&gt;</span></span>
+<span id="cb8-19"><a href="#cb8-19"></a>    <span class="kw">&lt;/asmv3:file&gt;</span></span>
+<span id="cb8-20"><a href="#cb8-20"></a><span class="kw">&lt;/assembly&gt;</span></span></code></pre></div></li>
+<li><p>Now the project structure is like as below:</p>
+<p><img src="../images/c++/17.png" width="300"></p></li>
+<li><p>Right click the Win32 Project <strong><em>SimpleApp</em></strong>, select <strong><em>Unload Project</em></strong></p></li>
+<li><p>Right click the <strong><em>SimpleApp (Unloaded)</em></strong> project, select <strong><em>Edit SimpleApp.vcxproj</em></strong></p></li>
+<li><p>Remove the three lines from the <strong><em>SimpleApp.vcxproj</em></strong> project file:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode xml"><code class="sourceCode xml"><span id="cb9-1"><a href="#cb9-1"></a><span class="kw">&lt;ItemGroup&gt;</span></span>
+<span id="cb9-2"><a href="#cb9-2"></a>    <span class="kw">&lt;Manifest</span><span class="ot"> Include=</span><span class="st">&quot;app.manifest&quot;</span> <span class="kw">/&gt;</span></span>
+<span id="cb9-3"><a href="#cb9-3"></a><span class="kw">&lt;/ItemGroup&gt;</span></span></code></pre></div>
+<p>Add below properties to the <strong><em>SimpleApp.vcxproj</em></strong> project file before the <strong><em>“&lt;Import Project=”“$(VCTargetsPath).Cpp.targets” /&gt;"</em></strong> line:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode xml"><code class="sourceCode xml"><span id="cb10-1"><a href="#cb10-1"></a>  <span class="kw">&lt;ItemGroup&gt;</span></span>
+<span id="cb10-2"><a href="#cb10-2"></a>    <span class="kw">&lt;Manifest</span><span class="ot"> Include=</span><span class="st">&quot;app.manifest&quot;</span> <span class="kw">/&gt;</span></span>
+<span id="cb10-3"><a href="#cb10-3"></a>    <span class="kw">&lt;AppxManifest</span><span class="ot"> Include=</span><span class="st">&quot;$(SolutionDir)\bin\$(Platform)\$(Configuration)\$(AppProjectName)\AppxManifest.xml&quot;</span> <span class="kw">/&gt;</span></span>
+<span id="cb10-4"><a href="#cb10-4"></a>  <span class="kw">&lt;/ItemGroup&gt;</span></span>
+<span id="cb10-5"><a href="#cb10-5"></a>  <span class="kw">&lt;PropertyGroup&gt;</span></span>
+<span id="cb10-6"><a href="#cb10-6"></a>    <span class="kw">&lt;AppProjectName&gt;</span>MyApp<span class="kw">&lt;/AppProjectName&gt;</span></span>
+<span id="cb10-7"><a href="#cb10-7"></a>  <span class="kw">&lt;/PropertyGroup&gt;</span></span>
+<span id="cb10-8"><a href="#cb10-8"></a>  <span class="kw">&lt;PropertyGroup&gt;</span></span>
+<span id="cb10-9"><a href="#cb10-9"></a>    <span class="kw">&lt;AppIncludeDirectories&gt;</span>$(SolutionDir)\obj\$(Platform)\$(Configuration)\$(AppProjectName)\;$(SolutionDir)\obj\$(Platform)\$(Configuration)\$(AppProjectName)\Generated Files\;<span class="kw">&lt;/AppIncludeDirectories&gt;</span></span>
+<span id="cb10-10"><a href="#cb10-10"></a>  <span class="kw">&lt;/PropertyGroup&gt;</span></span>
+<span id="cb10-11"><a href="#cb10-11"></a>    <span class="kw">&lt;ItemGroup&gt;</span></span>
+<span id="cb10-12"><a href="#cb10-12"></a>    <span class="kw">&lt;NativeReferenceFile</span><span class="ot"> Include=</span><span class="st">&quot;$(SolutionDir)\bin\$(Platform)\$(Configuration)\$(AppProjectName)\*.xbf&quot;</span><span class="kw">&gt;</span></span>
+<span id="cb10-13"><a href="#cb10-13"></a>      <span class="kw">&lt;DeploymentContent&gt;</span>true<span class="kw">&lt;/DeploymentContent&gt;</span></span>
+<span id="cb10-14"><a href="#cb10-14"></a>      <span class="kw">&lt;CopyToOutputDirectory&gt;</span>PreserveNewest<span class="kw">&lt;/CopyToOutputDirectory&gt;</span></span>
+<span id="cb10-15"><a href="#cb10-15"></a>    <span class="kw">&lt;/NativeReferenceFile&gt;</span></span>
+<span id="cb10-16"><a href="#cb10-16"></a>    <span class="kw">&lt;NativeReferenceFile</span><span class="ot"> Include=</span><span class="st">&quot;$(SolutionDir)\bin\$(Platform)\$(Configuration)\$(AppProjectName)\*.dll&quot;</span><span class="kw">&gt;</span></span>
+<span id="cb10-17"><a href="#cb10-17"></a>      <span class="kw">&lt;DeploymentContent&gt;</span>true<span class="kw">&lt;/DeploymentContent&gt;</span></span>
+<span id="cb10-18"><a href="#cb10-18"></a>      <span class="kw">&lt;CopyToOutputDirectory&gt;</span>PreserveNewest<span class="kw">&lt;/CopyToOutputDirectory&gt;</span></span>
+<span id="cb10-19"><a href="#cb10-19"></a>    <span class="kw">&lt;/NativeReferenceFile&gt;</span></span>
+<span id="cb10-20"><a href="#cb10-20"></a>    <span class="kw">&lt;NativeReferenceFile</span><span class="ot"> Include=</span><span class="st">&quot;$(SolutionDir)\bin\$(Platform)\$(Configuration)\$(AppProjectName)\resources.pri&quot;</span><span class="kw">&gt;</span></span>
+<span id="cb10-21"><a href="#cb10-21"></a>      <span class="kw">&lt;DeploymentContent&gt;</span>true<span class="kw">&lt;/DeploymentContent&gt;</span></span>
+<span id="cb10-22"><a href="#cb10-22"></a>      <span class="kw">&lt;CopyToOutputDirectory&gt;</span>PreserveNewest<span class="kw">&lt;/CopyToOutputDirectory&gt;</span></span>
+<span id="cb10-23"><a href="#cb10-23"></a>    <span class="kw">&lt;/NativeReferenceFile&gt;</span></span>
+<span id="cb10-24"><a href="#cb10-24"></a>  <span class="kw">&lt;/ItemGroup&gt;</span></span>
+<span id="cb10-25"><a href="#cb10-25"></a>  <span class="er">&lt;</span>------Right Here---------&gt;</span>
+<span id="cb10-26"><a href="#cb10-26"></a>  <span class="kw">&lt;Import</span><span class="ot"> Project=</span><span class="st">&quot;$(VCTargetsPath)\Microsoft.Cpp.targets&quot;</span> <span class="kw">/&gt;</span></span></code></pre></div></li>
+<li><p>Right click the <strong><em>SimpleApp (Unloaded)</em></strong> project, select <strong><em>Reload Project</em></strong>.</p></li>
+<li><p>Right click <strong><em>SimpleApp</em></strong>, select <strong><em>Properties</em></strong>, setup <strong><em>$(AppIncludeDirectories)</em></strong> as a part of include file path, this macro has been defined in the above project file:</p>
+<p><img src="../images/C++/18.png" width="400"></p></li>
+<li><p>Set <strong><em>“Per Monitor DPI Aware”</em></strong> for <strong><em>DPI Awareness</em></strong> otherwise you may be not able to start this SimpleApp when it is <strong><em>“High DPI Aware”</em></strong> and hit configuration error in Manifest:</p>
+<p><img src="../images/C++/19.png" width="200"></p>
+<p><img src="../images/C++/20.png" width="400"></p></li>
+<li><p>Open framework.h, remove this #define:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb11-1"><a href="#cb11-1"></a><span class="pp">#define WIN32_LEAN_AND_MEAN</span></span></code></pre></div></li>
+<li><p>In SimpleApp.h, add below code to include necessary winrt header files:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb12-1"><a href="#cb12-1"></a><span class="pp">#include </span><span class="im">&lt;winrt/Windows.Foundation.Collections.h&gt;</span></span>
+<span id="cb12-2"><a href="#cb12-2"></a><span class="pp">#include </span><span class="im">&lt;winrt/Windows.system.h&gt;</span></span>
+<span id="cb12-3"><a href="#cb12-3"></a><span class="pp">#include </span><span class="im">&lt;winrt/windows.ui.xaml.hosting.h&gt;</span></span>
+<span id="cb12-4"><a href="#cb12-4"></a><span class="pp">#include </span><span class="im">&lt;windows.ui.xaml.hosting.desktopwindowxamlsource.h&gt;</span></span>
+<span id="cb12-5"><a href="#cb12-5"></a><span class="pp">#include </span><span class="im">&lt;winrt/windows.ui.xaml.controls.h&gt;</span></span>
+<span id="cb12-6"><a href="#cb12-6"></a><span class="pp">#include </span><span class="im">&lt;winrt/Windows.ui.xaml.media.h&gt;</span></span>
+<span id="cb12-7"><a href="#cb12-7"></a><span class="pp">#include </span><span class="im">&lt;winrt/Windows.UI.Core.h&gt;</span></span>
+<span id="cb12-8"><a href="#cb12-8"></a><span class="pp">#include </span><span class="im">&lt;winrt/myapp.h&gt;</span></span></code></pre></div></li>
+<li><p>Using winrt namespaces in SimpleAPP.cpp</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb13-1"><a href="#cb13-1"></a><span class="kw">using</span> <span class="kw">namespace</span> winrt;</span>
+<span id="cb13-2"><a href="#cb13-2"></a><span class="kw">using</span> <span class="kw">namespace</span> Windows::UI;</span>
+<span id="cb13-3"><a href="#cb13-3"></a><span class="kw">using</span> <span class="kw">namespace</span> Windows::UI::Composition;</span>
+<span id="cb13-4"><a href="#cb13-4"></a><span class="kw">using</span> <span class="kw">namespace</span> Windows::UI::Xaml::Hosting;</span>
+<span id="cb13-5"><a href="#cb13-5"></a><span class="kw">using</span> <span class="kw">namespace</span> Windows::Foundation::Numerics;</span>
+<span id="cb13-6"><a href="#cb13-6"></a><span class="kw">using</span> <span class="kw">namespace</span> Windows::UI::Xaml::Controls;</span></code></pre></div></li>
+<li><p>Declare hostApp, _desktopWindowXamlSource and our custom control in <strong><em>SimpleApp.cpp</em></strong></p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb14-1"><a href="#cb14-1"></a>    UNREFERENCED_PARAMETER(hPrevInstance);</span>
+<span id="cb14-2"><a href="#cb14-2"></a>    UNREFERENCED_PARAMETER(lpCmdLine);</span>
+<span id="cb14-3"><a href="#cb14-3"></a></span>
+<span id="cb14-4"><a href="#cb14-4"></a>    <span class="co">// </span><span class="al">TODO</span><span class="co">: Place code here.</span></span>
+<span id="cb14-5"><a href="#cb14-5"></a>    winrt::init_apartment(winrt::<span class="dt">apartment_type</span>::single_threaded);</span>
+<span id="cb14-6"><a href="#cb14-6"></a>    hostApp = winrt::MyApp::App{};</span>
+<span id="cb14-7"><a href="#cb14-7"></a>    _desktopWindowXamlSource = winrt::Windows::UI::Xaml::Hosting::DesktopWindowXamlSource{};</span></code></pre></div></li>
+<li><p>Initalize hostApp, _desktopWindowXamlSource in <strong><em>wWinMain</em></strong> in <strong><em>SimpleApp.CPP</em></strong></p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb15-1"><a href="#cb15-1"></a>    winrt::init_apartment(winrt::<span class="dt">apartment_type</span>::single_threaded);</span>
+<span id="cb15-2"><a href="#cb15-2"></a>    hostApp = winrt::MyApp::App{};</span>
+<span id="cb15-3"><a href="#cb15-3"></a>    _desktopWindowXamlSource = winrt::Windows::UI::Xaml::Hosting::DesktopWindowXamlSource{};</span></code></pre></div></li>
+<li><p>Add below code in <strong><em>InitInstance</em></strong> in <strong><em>SimpleApp.cpp</em></strong></p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb16-1"><a href="#cb16-1"></a>    <span class="cf">if</span> (_desktopWindowXamlSource != <span class="kw">nullptr</span>)</span>
+<span id="cb16-2"><a href="#cb16-2"></a>   {</span>
+<span id="cb16-3"><a href="#cb16-3"></a>       <span class="co">// Get handle to corewindow</span></span>
+<span id="cb16-4"><a href="#cb16-4"></a>       <span class="kw">auto</span> interop = _desktopWindowXamlSource.as&lt;IDesktopWindowXamlSourceNative&gt;();</span>
+<span id="cb16-5"><a href="#cb16-5"></a>       <span class="co">// Parent the DesktopWindowXamlSource object to current window</span></span>
+<span id="cb16-6"><a href="#cb16-6"></a>       check_hresult(interop-&gt;AttachToWindow(hWnd));</span>
+<span id="cb16-7"><a href="#cb16-7"></a></span>
+<span id="cb16-8"><a href="#cb16-8"></a>       <span class="co">// This Hwnd will be the window handler for the Xaml Island: A child window that contains Xaml.  </span></span>
+<span id="cb16-9"><a href="#cb16-9"></a>       HWND hWndXamlIsland = <span class="kw">nullptr</span>;</span>
+<span id="cb16-10"><a href="#cb16-10"></a>       <span class="co">// Get the new child window&#39;s hwnd </span></span>
+<span id="cb16-11"><a href="#cb16-11"></a>       interop-&gt;get_WindowHandle(&amp;hWndXamlIsland);</span>
+<span id="cb16-12"><a href="#cb16-12"></a></span>
+<span id="cb16-13"><a href="#cb16-13"></a>       RECT windowRect;</span>
+<span id="cb16-14"><a href="#cb16-14"></a>       ::GetWindowRect(hWnd, &amp;windowRect);</span>
+<span id="cb16-15"><a href="#cb16-15"></a>       ::SetWindowPos(hWndXamlIsland, NULL, <span class="dv">0</span>, <span class="dv">0</span>, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top, SWP_SHOWWINDOW);</span>
+<span id="cb16-16"><a href="#cb16-16"></a></span>
+<span id="cb16-17"><a href="#cb16-17"></a>       _mainUserControl = winrt::MyApp::MainUserControl();</span>
+<span id="cb16-18"><a href="#cb16-18"></a>       _desktopWindowXamlSource.Content(_mainUserControl);</span>
+<span id="cb16-19"><a href="#cb16-19"></a>   }</span>
+<span id="cb16-20"><a href="#cb16-20"></a>   ShowWindow(hWnd, nCmdShow);</span>
+<span id="cb16-21"><a href="#cb16-21"></a>   UpdateWindow(hWnd);</span></code></pre></div></li>
+<li><p>Clean up resources when the view is disconstructed in MFCAppView.cpp</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb17-1"><a href="#cb17-1"></a> <span class="cf">case</span> WM_DESTROY:</span>
+<span id="cb17-2"><a href="#cb17-2"></a>    PostQuitMessage(<span class="dv">0</span>);</span>
+<span id="cb17-3"><a href="#cb17-3"></a>    <span class="cf">if</span> (_desktopWindowXamlSource != <span class="kw">nullptr</span>)</span>
+<span id="cb17-4"><a href="#cb17-4"></a>    {</span>
+<span id="cb17-5"><a href="#cb17-5"></a>        _desktopWindowXamlSource.Close();</span>
+<span id="cb17-6"><a href="#cb17-6"></a>        _desktopWindowXamlSource = <span class="kw">nullptr</span>;</span>
+<span id="cb17-7"><a href="#cb17-7"></a>    }</span>
+<span id="cb17-8"><a href="#cb17-8"></a>    <span class="cf">break</span>;</span></code></pre></div></li>
+<li><p>Add AdjustLayout function to make XAML content layout properly in SimpleApp.cpp :</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb18-1"><a href="#cb18-1"></a><span class="dt">void</span> AdjustLayout(HWND hWnd)</span>
+<span id="cb18-2"><a href="#cb18-2"></a>{</span>
+<span id="cb18-3"><a href="#cb18-3"></a>    <span class="cf">if</span> (_desktopWindowXamlSource != <span class="kw">nullptr</span>)</span>
+<span id="cb18-4"><a href="#cb18-4"></a>    {</span>
+<span id="cb18-5"><a href="#cb18-5"></a>        <span class="kw">auto</span> interop = _desktopWindowXamlSource.as&lt;IDesktopWindowXamlSourceNative&gt;();</span>
+<span id="cb18-6"><a href="#cb18-6"></a>        HWND xamlHostHwnd = NULL;</span>
+<span id="cb18-7"><a href="#cb18-7"></a>        check_hresult(interop-&gt;get_WindowHandle(&amp;xamlHostHwnd));</span>
+<span id="cb18-8"><a href="#cb18-8"></a></span>
+<span id="cb18-9"><a href="#cb18-9"></a>        RECT windowRect;</span>
+<span id="cb18-10"><a href="#cb18-10"></a>        ::GetWindowRect(hWnd, &amp;windowRect);</span>
+<span id="cb18-11"><a href="#cb18-11"></a>        ::SetWindowPos(xamlHostHwnd, NULL, <span class="dv">0</span>, <span class="dv">0</span>, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top, SWP_SHOWWINDOW);</span>
+<span id="cb18-12"><a href="#cb18-12"></a>    }</span>
+<span id="cb18-13"><a href="#cb18-13"></a>}</span></code></pre></div></li>
+<li><p>In SimpleApp.CPP handle WM_SIZE in the <strong><em>WinProc</em></strong> function: <code>C++             case WM_SIZE:                 AdjustLayout(hWnd);</code></p></li>
+<li><p>Now you can build and run this SimpleApp. It should display a button in the central of view window:</p>
+<p><img src="../images/C++/21.gif" width="400"></p></li>
+</ol>
+<h2 id="using-ink-control-in-myapp-uwp-project">Using Ink Control in MyApp UWP Project</h2>
+<ol type="1">
+<li><p>Add an <strong><em>Assets</em></strong> file folder under <strong><em>SimpleApp</em></strong> on file system, add viewbackground.png file. And then create a new filter of “Assets”, add this existing viewbackground.png into the <strong><em>Assets</em></strong> filter:</p>
+<p>Set the file’s <strong>Content</strong> property as <strong>True</strong></p>
+<p><img src="../images/C++/22.png" width="400"></p>
+<p>If you cannot see the <strong><em>viewbackground.png</em></strong> file, please click the “Show All Files” tool icon in the solution explorer window.</p></li>
+<li><p>Add the sample png file into <strong><em>Assets</em></strong> folder of <strong><em>MyApp</em></strong>, and make its <strong><em>Content</em></strong> property as <strong>True</strong> as well.</p></li>
+<li><p>Modify MainUserControl.Xaml as below in <strong><em>MyApp</em></strong>:</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode xml"><code class="sourceCode xml"><span id="cb19-1"><a href="#cb19-1"></a><span class="kw">&lt;UserControl</span></span>
+<span id="cb19-2"><a href="#cb19-2"></a><span class="ot">    x:Class=</span><span class="st">&quot;MyApp.MainUserControl&quot;</span></span>
+<span id="cb19-3"><a href="#cb19-3"></a><span class="ot">    xmlns=</span><span class="st">&quot;http://schemas.microsoft.com/winfx/2006/xaml/presentation&quot;</span></span>
+<span id="cb19-4"><a href="#cb19-4"></a><span class="ot">    xmlns:x=</span><span class="st">&quot;http://schemas.microsoft.com/winfx/2006/xaml&quot;</span></span>
+<span id="cb19-5"><a href="#cb19-5"></a><span class="ot">    xmlns:local=</span><span class="st">&quot;using:MyApp&quot;</span></span>
+<span id="cb19-6"><a href="#cb19-6"></a><span class="ot">    xmlns:d=</span><span class="st">&quot;http://schemas.microsoft.com/expression/blend/2008&quot;</span></span>
+<span id="cb19-7"><a href="#cb19-7"></a><span class="ot">    xmlns:mc=</span><span class="st">&quot;http://schemas.openxmlformats.org/markup-compatibility/2006&quot;</span></span>
+<span id="cb19-8"><a href="#cb19-8"></a><span class="ot">    mc:Ignorable=</span><span class="st">&quot;d&quot;</span><span class="kw">&gt;</span></span>
+<span id="cb19-9"><a href="#cb19-9"></a></span>
+<span id="cb19-10"><a href="#cb19-10"></a>    <span class="kw">&lt;RelativePanel</span><span class="ot"> HorizontalAlignment=</span><span class="st">&quot;Stretch&quot;</span><span class="ot"> VerticalAlignment=</span><span class="st">&quot;Stretch&quot;</span><span class="kw">&gt;</span></span>
+<span id="cb19-11"><a href="#cb19-11"></a>        <span class="kw">&lt;Image</span><span class="ot"> Source=</span><span class="st">&quot;assets/viewbackground.png&quot;</span><span class="ot"> RelativePanel.AlignLeftWithPanel=</span><span class="st">&quot;True&quot;</span> </span>
+<span id="cb19-12"><a href="#cb19-12"></a><span class="ot">               RelativePanel.AlignRightWithPanel=</span><span class="st">&quot;True&quot;</span></span>
+<span id="cb19-13"><a href="#cb19-13"></a><span class="ot">               RelativePanel.AlignHorizontalCenterWithPanel=</span><span class="st">&quot;True&quot;</span><span class="kw">&gt;&lt;/Image&gt;</span></span>
+<span id="cb19-14"><a href="#cb19-14"></a>        <span class="kw">&lt;InkCanvas</span><span class="ot"> x:Name=</span><span class="st">&quot;ic&quot;</span><span class="ot"> RelativePanel.AlignLeftWithPanel=</span><span class="st">&quot;True&quot;</span> </span>
+<span id="cb19-15"><a href="#cb19-15"></a><span class="ot">                   RelativePanel.AlignRightWithPanel=</span><span class="st">&quot;True&quot;</span> </span>
+<span id="cb19-16"><a href="#cb19-16"></a><span class="ot">                   RelativePanel.AlignBottomWithPanel=</span><span class="st">&quot;True&quot;</span></span>
+<span id="cb19-17"><a href="#cb19-17"></a><span class="ot">                   RelativePanel.AlignTopWithPanel=</span><span class="st">&quot;True&quot;</span><span class="kw">&gt;&lt;/InkCanvas&gt;</span></span>
+<span id="cb19-18"><a href="#cb19-18"></a>        <span class="kw">&lt;InkToolbar</span><span class="ot"> x:Name=</span><span class="st">&quot;it&quot;</span><span class="ot"> HorizontalAlignment=</span><span class="st">&quot;Left&quot;</span><span class="ot"> VerticalAlignment=</span><span class="st">&quot;Top&quot;</span><span class="kw">&gt;&lt;/InkToolbar&gt;</span></span>
+<span id="cb19-19"><a href="#cb19-19"></a>    <span class="kw">&lt;/RelativePanel&gt;</span></span>
+<span id="cb19-20"><a href="#cb19-20"></a><span class="kw">&lt;/UserControl&gt;</span></span></code></pre></div></li>
+<li><p>Add below code in MainUserControl.CPP, remove the Button ClickHandler code as we don’t use it now:</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb20-1"><a href="#cb20-1"></a>    MainUserControl::MainUserControl()</span>
+<span id="cb20-2"><a href="#cb20-2"></a>    {</span>
+<span id="cb20-3"><a href="#cb20-3"></a>        InitializeComponent();</span>
+<span id="cb20-4"><a href="#cb20-4"></a>        ic().InkPresenter().InputDeviceTypes((winrt::Windows::UI::Core::CoreInputDeviceTypes)<span class="dv">7</span>);</span>
+<span id="cb20-5"><a href="#cb20-5"></a>        it().TargetInkCanvas(ic());</span>
+<span id="cb20-6"><a href="#cb20-6"></a>    }</span></code></pre></div></li>
+<li><p>Include more winrt header files in MainUserControl.h:</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb21-1"><a href="#cb21-1"></a><span class="pp">#include </span><span class="im">&lt;winrt/Windows.UI.Input.Inking.h&gt;</span></span>
+<span id="cb21-2"><a href="#cb21-2"></a><span class="pp">#include </span><span class="im">&lt;winrt/Windows.UI.Xaml.Media.Imaging.h&gt;</span></span></code></pre></div></li>
+<li><p>Build and run Simple, if steps have been taken exactly as above, it will show as below:</p>
+<p><img src="../images/C++/23.png" width="400"></p></li>
+<li><p>You may notice that it doesn’t display the background image, this is because the uri <strong>assets/viewbackground.png</strong> needs to be used UWP package. In Visual Studio, with <strong>“Windows Application Packaging Project (C++)”</strong>, it is easily to packaging our SimpleApp project:</p>
+<p><img src="../images/MFC/16.png" Width=400></p>
+<p>Create the packaging project in the solution, right click the <strong>Application</strong> node, and select <strong>Add Reference</strong>, add SimpleApp. Now the packaging project structure is like:</p>
+<p><img src="../images/C++/24.png" Width=200></p>
+<p>For more information about packaging project, refer to: <a href="https://docs.microsoft.com/en-us/windows/msix/desktop/desktop-to-uwp-packaging-dot-net">Package a desktop app from source code using Visual Studio</a></p></li>
+<li><p>After this, choose the packaging project as Start Up project, Ctrl+F5 to run it. We can see the expected result will show up:</p>
+<p><img src="../images/C++/25.png" Width=400></p>
+<p>Further more, you can publish this packaging app as MSIX or APPX, and easily deploy it:</p>
+<p><a href="https://docs.microsoft.com/en-us/windows/msix/desktop/desktop-to-uwp-r2r">Package a UWP app with Visual Studio</a></p></li>
+</ol>
+<h2 id="wrap-up">Wrap Up</h2>
+<p>This article gives detailed steps on how to leverage XamplApplication to host standard XAML control in C++ Win32 project, with this method, it is flexible to leverage Win10 Controls in Win32 project. The whole sample solution can be found from this repo: https://github.com/freistli/ModernizeApp/tree/master/C%2B%2B/SimpleApp</p>
+<h2 id="further-step">Further Step</h2>
+<p>To use WinUI 2.x, you can refer to this <a href="https://github.com/freistli/ModernizeApp/blob/master/Docs/Host%20Custom%20UWP%20Controls%20in%20MFC%20MDI%20project%20using%20XMAL%20Islands.md#using-winui-in-uwp-custom-control-in-myapp-uwp-project">part</a> and embedded it in your C++ project. The sample solution is also ready from this repo: https://github.com/freistli/ModernizeApp/tree/master/C%2B%2B/SimpleAppWithWinUI/SimpleApp. Its left TreeView is from WinUI 2.4 prerelease:</p>
+<p><img src="../images/C++/26.png" Width=400></p>

@@ -30,9 +30,10 @@ Overall, in our solution, we will have two parts to demonstrate this method:
 3.	Install the ***Microsoft.Windows.CppWinRT*** NuGet package:
 
     a.	Right-click the project in Solution Explorer and choose ***Manage NuGet Packages***.
-    b.	Select the Browse tab, search for the **Microsoft.Windows.CppWinRT** package, and install the latest version of this package.  
-
-    <img src="../images/C++/03.png" width="400">
+    
+    b.	Select the Browse tab, search for the **Microsoft.Windows.CppWinRT** package, and install the latest version of this package.   
+    
+     <img src="../images/C++/03.png" width="400">
 
 
     After install the nuget package, check the SimpleApp project properties, you will notice its C++ version is ISO C++17, which is required by C++/WinRT:
@@ -87,7 +88,7 @@ Overall, in our solution, we will have two parts to demonstrate this method:
 
 7. Now edit Package.appxmanifest, change the Executable attribute to "dummy.exe"
 
-![image](../images/MFCCustomControl/7.png)
+    <img src="../images/MFCCustomControl/7.png" width="500">
 
 8. Right click the ***MyApp*** project, select ***Unload Project***
 
@@ -95,18 +96,18 @@ Overall, in our solution, we will have two parts to demonstrate this method:
 
 10. Add below properties to the ***MyApp.vcxproj*** project file:
 
-```XML
-<PropertyGroup Label="Globals">
-    <WindowsAppContainer>true</WindowsAppContainer>
-    <AppxGeneratePriEnabled>true</AppxGeneratePriEnabled>
-    <ProjectPriIndexName>App</ProjectPriIndexName>
-    <AppxPackage>true</AppxPackage>
-  </PropertyGroup>
-```
+    ```XML
+    <PropertyGroup Label="Globals">
+        <WindowsAppContainer>true</WindowsAppContainer>
+        <AppxGeneratePriEnabled>true</AppxGeneratePriEnabled>
+        <ProjectPriIndexName>App</ProjectPriIndexName>
+        <AppxPackage>true</AppxPackage>
+      </PropertyGroup>
+    ```
 
-For example:
+    For example:  
 
-![image](../images/MFCCustomControl/8.png)
+    <img src="../images/MFCCustomControl/8.png" width="500">
 
 11. Right click the ***MyApp (Unloaded)*** project, select ***Reload Project***.
 
@@ -116,138 +117,138 @@ For example:
 
 13. Copy App.Xaml, App.cpp, App.h, App.idl contents to overwrite current ones:
 
-***App.Xaml***
+    ***App.Xaml***
 
-```XML
-<Toolkit:XamlApplication
-    x:Class="MyApp.App"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:MyApp"
-    xmlns:Toolkit="using:Microsoft.Toolkit.Win32.UI.XamlHost"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    RequestedTheme="Light"
-    mc:Ignorable="d">
-</Toolkit:XamlApplication>
-```
+    ```XML
+    <Toolkit:XamlApplication
+        x:Class="MyApp.App"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="using:MyApp"
+        xmlns:Toolkit="using:Microsoft.Toolkit.Win32.UI.XamlHost"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        RequestedTheme="Light"
+        mc:Ignorable="d">
+    </Toolkit:XamlApplication>
+    ```
 
-***App.cpp***
-```C++
-#include "pch.h"
-#include "App.h"
-
-using namespace winrt;
-using namespace Windows::UI::Xaml;
-
-namespace winrt::MyApp::implementation
-{
-    App::App()
+    ***App.cpp***
+    ```C++
+    #include "pch.h"
+    #include "App.h"
+    
+    using namespace winrt;
+    using namespace Windows::UI::Xaml;
+    
+    namespace winrt::MyApp::implementation
     {
-        Initialize();
-
-        AddRef();
-        m_inner.as<::IUnknown>()->Release();
+        App::App()
+        {
+            Initialize();
+    
+            AddRef();
+            m_inner.as<::IUnknown>()->Release();
+        }
+    
+        App::~App()
+        {
+            Close();
+        }
     }
-
-    App::~App()
+    
+    ```
+    
+    ***App.h***
+    ```C++
+    //
+    // Declaration of the App class.
+    //
+    
+    #pragma once
+    
+    #include "App.g.h"
+    #include "App.base.h"
+    
+    namespace winrt::MyApp::implementation
     {
-        Close();
+        class App : public AppT2<App>
+        {
+        public:
+            App();
+            ~App();
+        };
     }
-}
-
-```
-
-***App.h***
-```C++
-//
-// Declaration of the App class.
-//
-
-#pragma once
-
-#include "App.g.h"
-#include "App.base.h"
-
-namespace winrt::MyApp::implementation
-{
-    class App : public AppT2<App>
+    
+    namespace winrt::MyApp::factory_implementation
     {
-    public:
-        App();
-        ~App();
-    };
-}
-
-namespace winrt::MyApp::factory_implementation
-{
-    class App : public AppT<App, implementation::App>
-    {
-    };
-}
-
-```
-***App.idl***
-```C++
-namespace MyApp
-{
-    [default_interface]
-    runtimeclass App: Microsoft.Toolkit.Win32.UI.XamlHost.XamlApplication
-    {
-        App();
+        class App : public AppT<App, implementation::App>
+        {
+        };
     }
-}
-
-```
+    
+    ```
+    ***App.idl***
+    ```C++
+    namespace MyApp
+    {
+        [default_interface]
+        runtimeclass App: Microsoft.Toolkit.Win32.UI.XamlHost.XamlApplication
+        {
+            App();
+        }
+    }
+    
+    ```
 14. Create app.base.h in this MyApp project, and use below content:
-
-***app.base.h***
-
-```C++
-#pragma once
-
-namespace winrt::MyApp::implementation
-{
-    template <typename D, typename... I>
-    struct App_baseWithProvider : public App_base<D, ::winrt::Windows::UI::Xaml::Markup::IXamlMetadataProvider>
+    
+    ***app.base.h***
+    
+    ```C++
+    #pragma once
+    
+    namespace winrt::MyApp::implementation
     {
-        using IXamlType = ::winrt::Windows::UI::Xaml::Markup::IXamlType;
-
-        IXamlType GetXamlType(::winrt::Windows::UI::Xaml::Interop::TypeName const& type)
+        template <typename D, typename... I>
+        struct App_baseWithProvider : public App_base<D, ::winrt::Windows::UI::Xaml::Markup::IXamlMetadataProvider>
         {
-            return AppProvider()->GetXamlType(type);
-        }
-
-        IXamlType GetXamlType(::winrt::hstring const& fullName)
-        {
-            return AppProvider()->GetXamlType(fullName);
-        }
-
-        ::winrt::com_array<::winrt::Windows::UI::Xaml::Markup::XmlnsDefinition> GetXmlnsDefinitions()
-        {
-            return AppProvider()->GetXmlnsDefinitions();
-        }
-
-    private:
-        bool _contentLoaded{ false };
-        std::shared_ptr<XamlMetaDataProvider> _appProvider;
-        std::shared_ptr<XamlMetaDataProvider> AppProvider()
-        {
-            if (!_appProvider)
+            using IXamlType = ::winrt::Windows::UI::Xaml::Markup::IXamlType;
+    
+            IXamlType GetXamlType(::winrt::Windows::UI::Xaml::Interop::TypeName const& type)
             {
-                _appProvider = std::make_shared<XamlMetaDataProvider>();
+                return AppProvider()->GetXamlType(type);
             }
-            return _appProvider;
-        }
-    };
-
-    template <typename D, typename... I>
-    using AppT2 = App_baseWithProvider<D, I...>;
-}
-
-
-```
-
+    
+            IXamlType GetXamlType(::winrt::hstring const& fullName)
+            {
+                return AppProvider()->GetXamlType(fullName);
+            }
+    
+            ::winrt::com_array<::winrt::Windows::UI::Xaml::Markup::XmlnsDefinition> GetXmlnsDefinitions()
+            {
+                return AppProvider()->GetXmlnsDefinitions();
+            }
+    
+        private:
+            bool _contentLoaded{ false };
+            std::shared_ptr<XamlMetaDataProvider> _appProvider;
+            std::shared_ptr<XamlMetaDataProvider> AppProvider()
+            {
+                if (!_appProvider)
+                {
+                    _appProvider = std::make_shared<XamlMetaDataProvider>();
+                }
+                return _appProvider;
+            }
+        };
+    
+        template <typename D, typename... I>
+        using AppT2 = App_baseWithProvider<D, I...>;
+    }
+    
+    
+    ```
+    
 14. Install [Microsoft.Toolkit.Win32.UI.XamlApplication](https://www.nuget.org/packages/Microsoft.Toolkit.Win32.UI.XamlApplication) Nuget package.
 
 15. If you build ***MyApp*** now, it should create MyApp.dll without any error.
@@ -262,16 +263,16 @@ This step is necessary for our next steps because we need to include winrt heade
 
 2. Use below content to overwrite the Solution.Props:
 
-```XML
-<?xml version="1.0" encoding="utf-8"?>
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup>
-    <IntDir>$(SolutionDir)\obj\$(Platform)\$(Configuration)\$(MSBuildProjectName)\</IntDir>
-    <OutDir>$(SolutionDir)\bin\$(Platform)\$(Configuration)\$(MSBuildProjectName)\</OutDir>
-    <GeneratedFilesDir>$(IntDir)Generated Files\</GeneratedFilesDir>
-  </PropertyGroup>
-</Project>
-```
+    ```XML
+    <?xml version="1.0" encoding="utf-8"?>
+    <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+      <PropertyGroup>
+        <IntDir>$(SolutionDir)\obj\$(Platform)\$(Configuration)\$(MSBuildProjectName)\</IntDir>
+        <OutDir>$(SolutionDir)\bin\$(Platform)\$(Configuration)\$(MSBuildProjectName)\</OutDir>
+        <GeneratedFilesDir>$(IntDir)Generated Files\</GeneratedFilesDir>
+      </PropertyGroup>
+    </Project>
+    ```
 3. Click Views -> Other Windows -> Property Manager
 
     <img src="../images/C++/12.png" width="200">
@@ -284,27 +285,27 @@ This step is necessary for our next steps because we need to include winrt heade
 
 6. Right click the project node ***MFCApp***, select Properties. 
 
-If you see the Outut and Intermidiate directries are already become as below, then can skip this step:
-
-$(SolutionDir)\bin\$(Platform)\$(Configuration)\$(MSBuildProjectName)\
-and
-$(SolutionDir)\obj\$(Platform)\$(Configuration)\$(MSBuildProjectName)\
+    If you see the Outut and Intermidiate directries are already become as below, then can skip this step:
     
-Otherwise please manually set：
-
-Output Directory:
-$(OutDir)
-
-Intermidia Directory:
-$(IntDir)
-
- <img src="../images/MFCCustomControl/12.png" width="400">
+    $(SolutionDir)\bin\$(Platform)\$(Configuration)\$(MSBuildProjectName)\
+    and
+    $(SolutionDir)\obj\$(Platform)\$(Configuration)\$(MSBuildProjectName)\
+        
+    Otherwise please manually set：
+    
+    Output Directory:
+    $(OutDir)
+    
+    Intermidia Directory:
+    $(IntDir)
+    
+     <img src="../images/MFCCustomControl/12.png" width="400">
 
 7. Repeat the step 6 for ***MyApp***.
 
 8. Right click the Solution node, and choose ***Project Dependencies***, make sure SimpleApp depends on MyApp:
 
-     <img src="../images/MFCCustomControl/16.png" width="200">
+     <img src="../images/C++/15.png" width="200">
 
 9. Rebuild the whole solution, it should work without errors.
 
@@ -320,28 +321,28 @@ $(IntDir)
 
 1. Add one XML file **app.manifest** in your project with below content to register custom control type:
 
-```XML
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<assembly
-    xmlns="urn:schemas-microsoft-com:asm.v1"
-    xmlns:asmv3="urn:schemas-microsoft-com:asm.v3"
-    manifestVersion="1.0">
-    <asmv3:file name="MyApp.dll">
-        <activatableClass
-            name="MyApp.App"
-            threadingModel="both"
-            xmlns="urn:schemas-microsoft-com:winrt.v1" />
-        <activatableClass
-            name="MyApp.XamlMetadataProvider"
-            threadingModel="both"
-            xmlns="urn:schemas-microsoft-com:winrt.v1" />
-        <activatableClass
-            name="MyApp.MainUserControl"
-            threadingModel="both"
-            xmlns="urn:schemas-microsoft-com:winrt.v1" />
-    </asmv3:file>
-</assembly>
-```
+    ```XML
+    <?xml version="1.0" encoding="utf-8" standalone="yes"?>
+    <assembly
+        xmlns="urn:schemas-microsoft-com:asm.v1"
+        xmlns:asmv3="urn:schemas-microsoft-com:asm.v3"
+        manifestVersion="1.0">
+        <asmv3:file name="MyApp.dll">
+            <activatableClass
+                name="MyApp.App"
+                threadingModel="both"
+                xmlns="urn:schemas-microsoft-com:winrt.v1" />
+            <activatableClass
+                name="MyApp.XamlMetadataProvider"
+                threadingModel="both"
+                xmlns="urn:schemas-microsoft-com:winrt.v1" />
+            <activatableClass
+                name="MyApp.MainUserControl"
+                threadingModel="both"
+                xmlns="urn:schemas-microsoft-com:winrt.v1" />
+        </asmv3:file>
+    </assembly>
+    ```
 2.  Now the project structure is like as below:
 
     <img src="../images/c++/17.png" width="300">
@@ -352,42 +353,42 @@ $(IntDir)
 
 5. Remove the three lines from the ***SimpleApp.vcxproj*** project file:
 
-```XML
-<ItemGroup>
-    <Manifest Include="app.manifest" />
-</ItemGroup>
-```
-
-Add below properties to the ***SimpleApp.vcxproj*** project file before the ***"<Import Project=""$(VCTargetsPath)\Microsoft.Cpp.targets" />"*** line:
-
-```XML
-  <ItemGroup>
-    <Manifest Include="app.manifest" />
-    <AppxManifest Include="$(SolutionDir)\bin\$(Platform)\$(Configuration)\$(AppProjectName)\AppxManifest.xml" />
-  </ItemGroup>
-  <PropertyGroup>
-    <AppProjectName>MyApp</AppProjectName>
-  </PropertyGroup>
-  <PropertyGroup>
-    <AppIncludeDirectories>$(SolutionDir)\obj\$(Platform)\$(Configuration)\$(AppProjectName)\;$(SolutionDir)\obj\$(Platform)\$(Configuration)\$(AppProjectName)\Generated Files\;</AppIncludeDirectories>
-  </PropertyGroup>
+    ```XML
     <ItemGroup>
-    <NativeReferenceFile Include="$(SolutionDir)\bin\$(Platform)\$(Configuration)\$(AppProjectName)\*.xbf">
-      <DeploymentContent>true</DeploymentContent>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </NativeReferenceFile>
-    <NativeReferenceFile Include="$(SolutionDir)\bin\$(Platform)\$(Configuration)\$(AppProjectName)\*.dll">
-      <DeploymentContent>true</DeploymentContent>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </NativeReferenceFile>
-    <NativeReferenceFile Include="$(SolutionDir)\bin\$(Platform)\$(Configuration)\$(AppProjectName)\resources.pri">
-      <DeploymentContent>true</DeploymentContent>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </NativeReferenceFile>
-  </ItemGroup>
-  <------Right Here--------->
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-```
+        <Manifest Include="app.manifest" />
+    </ItemGroup>
+    ```
+
+    Add below properties to the ***SimpleApp.vcxproj*** project file before the ***"<Import Project=""$(VCTargetsPath)\Microsoft.Cpp.targets" />"*** line:
+    
+    ```XML
+      <ItemGroup>
+        <Manifest Include="app.manifest" />
+        <AppxManifest Include="$(SolutionDir)\bin\$(Platform)\$(Configuration)\$(AppProjectName)\AppxManifest.xml" />
+      </ItemGroup>
+      <PropertyGroup>
+        <AppProjectName>MyApp</AppProjectName>
+      </PropertyGroup>
+      <PropertyGroup>
+        <AppIncludeDirectories>$(SolutionDir)\obj\$(Platform)\$(Configuration)\$(AppProjectName)\;$(SolutionDir)\obj\$(Platform)\$(Configuration)\$(AppProjectName)\Generated Files\;</AppIncludeDirectories>
+      </PropertyGroup>
+        <ItemGroup>
+        <NativeReferenceFile Include="$(SolutionDir)\bin\$(Platform)\$(Configuration)\$(AppProjectName)\*.xbf">
+          <DeploymentContent>true</DeploymentContent>
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </NativeReferenceFile>
+        <NativeReferenceFile Include="$(SolutionDir)\bin\$(Platform)\$(Configuration)\$(AppProjectName)\*.dll">
+          <DeploymentContent>true</DeploymentContent>
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </NativeReferenceFile>
+        <NativeReferenceFile Include="$(SolutionDir)\bin\$(Platform)\$(Configuration)\$(AppProjectName)\resources.pri">
+          <DeploymentContent>true</DeploymentContent>
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </NativeReferenceFile>
+      </ItemGroup>
+      <------Right Here--------->
+      <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+    ```
 
 6. Right click the ***SimpleApp (Unloaded)*** project, select ***Reload Project***.
 
@@ -395,7 +396,8 @@ Add below properties to the ***SimpleApp.vcxproj*** project file before the ***"
 
      <img src="../images/C++/18.png" width="400">
 
-8. Set ***"Per Monitor DPI Aware"*** for ***DPI Awareness*** otherwise you may be not able to start this SimpleApp when it is ***"High DPI Aware"*** and hit configuration error in Manifest:
+8. Set ***"Per Monitor DPI Aware"*** for ***DPI Awareness*** otherwise you may be not able to start this SimpleApp when it is ***"High DPI Aware"*** and hit configuration error in Manifest:  
+
     <img src="../images/C++/19.png" width="200">
 
     <img src="../images/C++/20.png" width="400">
@@ -421,34 +423,34 @@ Add below properties to the ***SimpleApp.vcxproj*** project file before the ***"
     
  11.   Using winrt namespaces in SimpleAPP.cpp
 
-    ```C++
-    using namespace winrt;
-    using namespace Windows::UI;
-    using namespace Windows::UI::Composition;
-    using namespace Windows::UI::Xaml::Hosting;
-    using namespace Windows::Foundation::Numerics;
-    using namespace Windows::UI::Xaml::Controls;
-    ```
+        ```C++
+        using namespace winrt;
+        using namespace Windows::UI;
+        using namespace Windows::UI::Composition;
+        using namespace Windows::UI::Xaml::Hosting;
+        using namespace Windows::Foundation::Numerics;
+        using namespace Windows::UI::Xaml::Controls;
+        ```
 
 12.  Declare hostApp, _desktopWindowXamlSource and our custom control in ***SimpleApp.cpp***
-
-```C++
-    UNREFERENCED_PARAMETER(hPrevInstance);
-    UNREFERENCED_PARAMETER(lpCmdLine);
-
-    // TODO: Place code here.
-    winrt::init_apartment(winrt::apartment_type::single_threaded);
-    hostApp = winrt::MyApp::App{};
-    _desktopWindowXamlSource = winrt::Windows::UI::Xaml::Hosting::DesktopWindowXamlSource{};
-```
+    
+        ```C++
+            UNREFERENCED_PARAMETER(hPrevInstance);
+            UNREFERENCED_PARAMETER(lpCmdLine);
+        
+            // TODO: Place code here.
+            winrt::init_apartment(winrt::apartment_type::single_threaded);
+            hostApp = winrt::MyApp::App{};
+            _desktopWindowXamlSource = winrt::Windows::UI::Xaml::Hosting::DesktopWindowXamlSource{};
+        ```
 
 13. Initalize hostApp, _desktopWindowXamlSource in ***wWinMain*** in ***SimpleApp.CPP***
 
-```C++
-	winrt::init_apartment(winrt::apartment_type::single_threaded);
-    hostApp = winrt::MyApp::App{};
-    _desktopWindowXamlSource = winrt::Windows::UI::Xaml::Hosting::DesktopWindowXamlSource{};
-```
+    ```C++
+    	winrt::init_apartment(winrt::apartment_type::single_threaded);
+        hostApp = winrt::MyApp::App{};
+        _desktopWindowXamlSource = winrt::Windows::UI::Xaml::Hosting::DesktopWindowXamlSource{};
+    ```
 
 14. Add below code in ***InitInstance*** in ***SimpleApp.cpp***
 
@@ -492,26 +494,26 @@ Add below properties to the ***SimpleApp.vcxproj*** project file before the ***"
 16.  Add AdjustLayout function to make XAML content layout properly in SimpleApp.cpp
 :
 
-    ```C++
-    void AdjustLayout(HWND hWnd)
-    {
-        if (_desktopWindowXamlSource != nullptr)
+        ```C++
+        void AdjustLayout(HWND hWnd)
         {
-            auto interop = _desktopWindowXamlSource.as<IDesktopWindowXamlSourceNative>();
-            HWND xamlHostHwnd = NULL;
-            check_hresult(interop->get_WindowHandle(&xamlHostHwnd));
-    
-            RECT windowRect;
-            ::GetWindowRect(hWnd, &windowRect);
-            ::SetWindowPos(xamlHostHwnd, NULL, 0, 0, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top, SWP_SHOWWINDOW);
+            if (_desktopWindowXamlSource != nullptr)
+            {
+                auto interop = _desktopWindowXamlSource.as<IDesktopWindowXamlSourceNative>();
+                HWND xamlHostHwnd = NULL;
+                check_hresult(interop->get_WindowHandle(&xamlHostHwnd));
+        
+                RECT windowRect;
+                ::GetWindowRect(hWnd, &windowRect);
+                ::SetWindowPos(xamlHostHwnd, NULL, 0, 0, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top, SWP_SHOWWINDOW);
+            }
         }
-    }
-    ```
+        ```
 17.  In SimpleApp.CPP handle WM_SIZE in the ***WinProc*** function: 
-    ```C++
-        case WM_SIZE:
-            AdjustLayout(hWnd);
-    ```C++
+        ```C++
+            case WM_SIZE:
+                AdjustLayout(hWnd);
+        ```
 18. Now you can build and run this SimpleApp. It should display a button in the central of view window:
 
     <img src="../images/C++/21.gif" width="400">
@@ -524,36 +526,36 @@ Add below properties to the ***SimpleApp.vcxproj*** project file before the ***"
 
     <img src="../images/C++/22.png" width="400">
 
-    > If you cannot see the ***viewbackground.png*** file, please click the "Show All Files" tool icon in the solution explorer window.
+    If you cannot see the ***viewbackground.png*** file, please click the "Show All Files" tool icon in the solution explorer window.
 
 2. Add the sample png file into ***Assets*** folder of ***MyApp***, and make its ***Content*** property as **True** as well.
 
 3. Modify MainUserControl.Xaml as below in ***MyApp***:
 
-```XML
-<UserControl
-    x:Class="MyApp.MainUserControl"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:MyApp"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d">
-
-    <RelativePanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-        <Image Source="assets/viewbackground.png" RelativePanel.AlignLeftWithPanel="True" 
-               RelativePanel.AlignRightWithPanel="True"
-               RelativePanel.AlignHorizontalCenterWithPanel="True"></Image>
-        <InkCanvas x:Name="ic" RelativePanel.AlignLeftWithPanel="True" 
-                   RelativePanel.AlignRightWithPanel="True" 
-                   RelativePanel.AlignBottomWithPanel="True"
-                   RelativePanel.AlignTopWithPanel="True"></InkCanvas>
-        <InkToolbar x:Name="it" HorizontalAlignment="Left" VerticalAlignment="Top"></InkToolbar>
-    </RelativePanel>
-</UserControl>
-
-```
-
+    ```XML
+    <UserControl
+        x:Class="MyApp.MainUserControl"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="using:MyApp"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d">
+    
+        <RelativePanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <Image Source="assets/viewbackground.png" RelativePanel.AlignLeftWithPanel="True" 
+                   RelativePanel.AlignRightWithPanel="True"
+                   RelativePanel.AlignHorizontalCenterWithPanel="True"></Image>
+            <InkCanvas x:Name="ic" RelativePanel.AlignLeftWithPanel="True" 
+                       RelativePanel.AlignRightWithPanel="True" 
+                       RelativePanel.AlignBottomWithPanel="True"
+                       RelativePanel.AlignTopWithPanel="True"></InkCanvas>
+            <InkToolbar x:Name="it" HorizontalAlignment="Left" VerticalAlignment="Top"></InkToolbar>
+        </RelativePanel>
+    </UserControl>
+    
+    ```
+    
 4. Add below code in MainUserControl.CPP, remove the Button ClickHandler code as we don't use it now:
 
     ```C++
@@ -577,22 +579,28 @@ Add below properties to the ***SimpleApp.vcxproj*** project file before the ***"
 
 7. You may notice that it doesn't display the background image, this is because the uri **assets/viewbackground.png** needs to be used UWP package. In Visual Studio, with **"Windows Application Packaging Project (C++)"**, it is easily to packaging our SimpleApp project:
 
-<img src="../images/MFC/16.png" Width=400>
+    <img src="../images/MFC/16.png" Width=400>
 
-Create the packaging project in the solution, right click the **Application** node, and select **Add Reference**, add SimpleApp. Now the packaging project structure is like:
+    Create the packaging project in the solution, right click the **Application** node, and select **Add Reference**, add SimpleApp. Now the packaging project structure is like:
+    
+    <img src="../images/C++/24.png" Width=200>
+    
+    For more information about packaging project, refer to:
+    [Package a desktop app from source code using Visual Studio](https://docs.microsoft.com/en-us/windows/msix/desktop/desktop-to-uwp-packaging-dot-net)
 
-<img src="../images/C++/24.png" Width=200>
+8. After this, choose the packaging project as Start Up project, Ctrl+F5 to run it. We can see the expected result will show up:
 
-For more information about packaging project, refer to:
-[Package a desktop app from source code using Visual Studio](https://docs.microsoft.com/en-us/windows/msix/desktop/desktop-to-uwp-packaging-dot-net)
+    <img src="../images/C++/25.png" Width=400>
 
-After this, choose the packaging project as Start Up project, Ctrl+F5 to run it. We can see the expected result will show up:
-
-<img src="../images/C++/25.png" Width=400>
-
-Further more, you can publish this packaging app as MSIX or APPX, and easily deploy it:
-
-[Package a UWP app with Visual Studio](https://docs.microsoft.com/en-us/windows/msix/desktop/desktop-to-uwp-r2r)
+    Further more, you can publish this packaging app as MSIX or APPX, and easily deploy it:
+    
+    [Package a UWP app with Visual Studio](https://docs.microsoft.com/en-us/windows/msix/desktop/desktop-to-uwp-r2r)
 
 ## Wrap Up
 This article gives detailed steps on how to leverage XamplApplication to host standard XAML control in C++ Win32 project, with this method, it is flexible to leverage Win10 Controls in Win32 project. The whole sample solution can be found from this repo: https://github.com/freistli/ModernizeApp/tree/master/C%2B%2B/SimpleApp
+
+## Further Step
+To use WinUI 2.x, you can refer to this [part](https://github.com/freistli/ModernizeApp/blob/master/Docs/Host%20Custom%20UWP%20Controls%20in%20MFC%20MDI%20project%20using%20XMAL%20Islands.md#using-winui-in-uwp-custom-control-in-myapp-uwp-project) and embedded it in your C++ project. The sample solution is also ready from this repo: https://github.com/freistli/ModernizeApp/tree/master/C%2B%2B/SimpleAppWithWinUI/SimpleApp. Its left TreeView is from WinUI 2.4 prerelease:
+
+
+<img src="../images/C++/26.png" Width=400>
