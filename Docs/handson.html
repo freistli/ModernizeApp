@@ -311,13 +311,18 @@ and $(SolutionDir)$(Platform)$(Configuration)$(MSBuildProjectName)<br />
 <span id="cb13-5"><a href="#cb13-5"></a><span class="kw">using</span> <span class="kw">namespace</span> Windows::Foundation::Numerics;</span>
 <span id="cb13-6"><a href="#cb13-6"></a><span class="kw">using</span> <span class="kw">namespace</span> Windows::UI::Xaml::Controls;</span></code></pre></div></li>
 <li><p>Declare hostApp, _desktopWindowXamlSource and our custom control in <strong><em>SimpleApp.cpp</em></strong></p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb14-1"><a href="#cb14-1"></a>    UNREFERENCED_PARAMETER(hPrevInstance);</span>
-<span id="cb14-2"><a href="#cb14-2"></a>    UNREFERENCED_PARAMETER(lpCmdLine);</span>
-<span id="cb14-3"><a href="#cb14-3"></a></span>
-<span id="cb14-4"><a href="#cb14-4"></a>    <span class="co">// </span><span class="al">TODO</span><span class="co">: Place code here.</span></span>
-<span id="cb14-5"><a href="#cb14-5"></a>    winrt::init_apartment(winrt::<span class="dt">apartment_type</span>::single_threaded);</span>
-<span id="cb14-6"><a href="#cb14-6"></a>    hostApp = winrt::MyApp::App{};</span>
-<span id="cb14-7"><a href="#cb14-7"></a>    _desktopWindowXamlSource = winrt::Windows::UI::Xaml::Hosting::DesktopWindowXamlSource{};</span></code></pre></div></li>
+<div class="sourceCode" id="cb14"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb14-1"><a href="#cb14-1"></a>     <span class="co">// Global Variables:</span></span>
+<span id="cb14-2"><a href="#cb14-2"></a>    HINSTANCE hInst;                                </span>
+<span id="cb14-3"><a href="#cb14-3"></a>    <span class="co">// current instance</span></span>
+<span id="cb14-4"><a href="#cb14-4"></a>    WCHAR szTitle[MAX_LOADSTRING];                  </span>
+<span id="cb14-5"><a href="#cb14-5"></a>    <span class="co">// The title bar text</span></span>
+<span id="cb14-6"><a href="#cb14-6"></a>    WCHAR szWindowClass[MAX_LOADSTRING];            </span>
+<span id="cb14-7"><a href="#cb14-7"></a>    <span class="co">// the main window class name</span></span>
+<span id="cb14-8"><a href="#cb14-8"></a></span>
+<span id="cb14-9"><a href="#cb14-9"></a></span>
+<span id="cb14-10"><a href="#cb14-10"></a>    winrt::MyApp::App hostApp{ <span class="kw">nullptr</span> };</span>
+<span id="cb14-11"><a href="#cb14-11"></a>    winrt::Windows::UI::Xaml::Hosting::DesktopWindowXamlSource _desktopWindowXamlSource{ <span class="kw">nullptr</span> };</span>
+<span id="cb14-12"><a href="#cb14-12"></a>    winrt::MyApp::MainUserControl _mainUserControl{ <span class="kw">nullptr</span> };</span></code></pre></div></li>
 <li><p>Initalize hostApp, _desktopWindowXamlSource in <strong><em>wWinMain</em></strong> in <strong><em>SimpleApp.CPP</em></strong></p>
 <div class="sourceCode" id="cb15"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb15-1"><a href="#cb15-1"></a>    winrt::init_apartment(winrt::<span class="dt">apartment_type</span>::single_threaded);</span>
 <span id="cb15-2"><a href="#cb15-2"></a>    hostApp = winrt::MyApp::App{};</span>

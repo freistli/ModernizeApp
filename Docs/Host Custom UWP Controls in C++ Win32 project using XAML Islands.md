@@ -435,13 +435,18 @@ This step is necessary for our next steps because we need to include winrt heade
 12.  Declare hostApp, _desktopWindowXamlSource and our custom control in ***SimpleApp.cpp***
     
         ```C++
-            UNREFERENCED_PARAMETER(hPrevInstance);
-            UNREFERENCED_PARAMETER(lpCmdLine);
-        
-            // TODO: Place code here.
-            winrt::init_apartment(winrt::apartment_type::single_threaded);
-            hostApp = winrt::MyApp::App{};
-            _desktopWindowXamlSource = winrt::Windows::UI::Xaml::Hosting::DesktopWindowXamlSource{};
+             // Global Variables:
+            HINSTANCE hInst;                                
+            // current instance
+            WCHAR szTitle[MAX_LOADSTRING];                  
+            // The title bar text
+            WCHAR szWindowClass[MAX_LOADSTRING];            
+            // the main window class name
+            
+            
+            winrt::MyApp::App hostApp{ nullptr };
+            winrt::Windows::UI::Xaml::Hosting::DesktopWindowXamlSource _desktopWindowXamlSource{ nullptr };
+            winrt::MyApp::MainUserControl _mainUserControl{ nullptr };
         ```
 
 13. Initalize hostApp, _desktopWindowXamlSource in ***wWinMain*** in ***SimpleApp.CPP***

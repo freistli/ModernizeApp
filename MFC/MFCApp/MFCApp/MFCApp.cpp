@@ -34,6 +34,14 @@ END_MESSAGE_MAP()
 
 CMFCAppApp::CMFCAppApp() noexcept
 {
+	BOOL result = SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
+
+	if (result == false)
+	{
+		DWORD hr = GetLastError();
+		DWORD x = hr;
+	}
+	
 	m_bHiColorIcons = TRUE;
 
 	// support Restart Manager
@@ -62,6 +70,7 @@ CMFCAppApp theApp;
 
 BOOL CMFCAppApp::InitInstance()
 {
+	
 	// InitCommonControlsEx() is required on Windows XP if an application
 	// manifest specifies use of ComCtl32.dll version 6 or later to enable
 	// visual styles.  Otherwise, any window creation will fail.
