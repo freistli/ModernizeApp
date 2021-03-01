@@ -7,13 +7,17 @@ Overall, in our solution, we will have two parts to demonstrate this method:
 * C++ Win32 Project
 * A companion UWP app project that defines a XamlApplication object.  
 
-  In this project, we will define a custom UWP control and export it so that C++ Win32 can use the custom UWP control.
+
+In this project, we will define a custom UWP control and export it so that C++ Win32 can use the custom UWP control.
 
 ## Development Environment  
 
 * Visual Studio 2019 (16.3.6)  
 * Windows 10 1909 (18363.476)  
 * Windows 10 SDK (10.0.18362.1)  
+
+**IMPORTANT (2021-03-01)**: Please use the same versions of those nuget packages in this article firstly, they work fine.
+And then upgrade them carefully. Otherwise, may have conflict errors as I found this can impact a lot.
 
 ## Configure C++ Win32 Project
 
@@ -585,6 +589,10 @@ This step is necessary for our next steps because we need to include winrt heade
 7. You may notice that it doesn't display the background image, this is because the uri **assets/viewbackground.png** needs to be used UWP package. In Visual Studio, with **"Windows Application Packaging Project (C++)"**, it is easily to packaging our SimpleApp project:
 
     <img src="../images/MFC/16.png" Width=400>
+
+    **Update**: Different build env may have different result.
+            With VS 2019 16.8.6 building on Win2004, the background img can show up without packaging. 
+
 
     Create the packaging project in the solution, right click the **Application** node, and select **Add Reference**, add SimpleApp. Now the packaging project structure is like:
     
